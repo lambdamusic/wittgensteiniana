@@ -1,0 +1,134 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+{% load static %}
+
+
+{# MANY SENTENCES APP - January 7, 2016 #}
+
+
+
+<html>
+  <head>
+
+	<style type="text/css">
+
+	/*index page */
+
+
+	.text-center-fixed {
+		position: fixed;
+		top: 5%;
+		left: 15%;
+		right: 15%;
+
+	}
+
+	.homelink {
+		color: lightslategray;
+		text-transform: uppercase;
+	}
+
+	div.unitscloud {font-size: 9px; padding: 10px; color: darkblue;}
+	div.unitscloud a:link  {text-decoration: none; color: blue;}
+	div.unitscloud a:visited {text-decoration: none; color: blue;}
+	div.unitscloud a:active {text-decoration: none; color: blue;}
+	div.unitscloud a:hover {background: darkblue; color: white;}
+	div.unitscloud a:hover .biginitial {background: darkblue; color: white; font-size: 170%; }
+
+	div.unitscloud a.active  {text-decoration: none; background: blue; color: white;}
+	div.unitscloud a.active:hover  {text-decoration: none; background: lightblue; color: white;}
+
+	.biginitial {
+		font-size: 180%;
+		color: darkorchid;
+	}
+
+	.centered {
+	  position: fixed;
+	  top: 10%;
+	  left: 25%;
+	  right: 25%;
+	}
+
+	.highlight_number {
+		font-size: 80px;
+		color: #CACACA;
+	}
+	.highlight_preview {
+		font-size: 20px;
+		color: #CACACA;
+	}
+
+	.highlight_space {
+
+	}
+
+
+
+
+	/* sentence page*/
+
+	.sentence {
+/*		font-family: monospace;*/
+		font-size: 18px;
+		padding: 5px;
+		line-height: 25px;
+		color: darkslategrey;	/*darkgrey*/
+		display: inline-block;
+	}
+
+	.sentence table {
+		font-size: 25px;
+	}
+
+
+	div.centered, table.truthtable {
+		position: relative;
+	}
+
+
+	.text-center {
+		position: relative;
+		margin-top: 5%;
+		margin-left: 23%;
+		margin-right: 21%;
+	}
+
+
+
+
+	</style>
+
+	<title>
+	{% block pagetitle %}{% endblock pagetitle %}
+	</title>
+
+</head>
+
+  <body style="height: 800px;">
+
+	  {% block bodycontent %}
+
+
+	  {% endblock bodycontent %}
+
+
+
+
+{% include 'tractatusapp/ga.html' %}
+
+{# <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> #}
+<!-- <script src="{{ STATIC_URL }}libs/jquery/1.11.1/jquery.min.js"></script> -->
+
+{# https://github.com/mattboldt/typed.js/issues/25 #}
+
+<script src="{% static 'libs/jquery/1.11.1/jquery.min.js' %}"></script>
+
+
+{% block global_js %}
+
+{% endblock global_js %}
+
+  </body>
+</html>

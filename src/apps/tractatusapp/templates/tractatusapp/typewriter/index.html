@@ -1,0 +1,53 @@
+{% extends "tractatusapp/typewriter/base.html" %}
+
+
+{% block pagetitle %}...{% endblock pagetitle %}
+
+
+
+{% block bodycontent %}
+
+		<div class="unitscloud text-center-fixed">
+
+			{% for unit in all_units  %}
+
+				<span><a href="{% url 'tractatusapp:get_sentence' unit.name %}" name="{{unit.textOgden|striptags|truncatewords:10|escape}}">{{unit.name}}</a>&nbsp;&nbsp;</span>
+
+			{% endfor %}
+
+
+			<br /><br /><br /><br />
+			<div id="highlight_space" >
+				<span class="highlight_number"></span>
+				<br />
+				<span class="highlight_preview"></span>
+
+			</div>
+
+
+		</div>
+
+{% endblock bodycontent %}
+
+
+
+
+{% block global_js %}
+
+	<script>
+	    $(function(){
+	        $(".unitscloud a").mouseover(function() {
+				// console.log(this.text);
+				var preview = this.name.replace('<div class="ogd">', ''); // hack due to the way source text is encoded
+				$("span.highlight_number").text(this.text);  // = the number
+				$("span.highlight_preview").text(preview);
+		   })
+		   .mouseout(function() {
+		       $("span.highlight_number").text("");
+		       $("span.highlight_preview").text("");
+		   });
+	   });
+	</script>
+
+
+{% endblock global_js %}

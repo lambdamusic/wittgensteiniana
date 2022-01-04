@@ -1,0 +1,5 @@
+django<4.0.0
+django-extensions
+Werkzeug
+click
+requests

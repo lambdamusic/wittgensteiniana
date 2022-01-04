@@ -1,0 +1,52 @@
+{# IN THE HEADER OF THE MAIN PAGE: #}
+
+{# <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}labs/css/jqeasypanel.css"/> #}
+{# <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}labs/css/navbar.css"/> #}
+{# <script type="text/javascript" src="{{ STATIC_URL }}labs/js/jquery1.6/jquery.min.js"></script> #}
+{# <script type="text/javascript" src="{{ STATIC_URL }}labs/js/jquery.jqEasyPanel.min.js"></script> #}
+
+{# <script>  #}
+{# $(document).ready(function() { #}
+
+{# 	$('#jqeasypanel').jqEasyPanel({height: '130px'});		 #}
+
+{# }); #}
+{# </script> #}
+
+
+
+
+
+
+
+{# THIS SNIPPET SHOULD GO RIGHT AFTER THE BODY ELEMENT #}
+
+{# supports a 'experiment_title' and an 'experiment_description' variable  #}
+
+
+<div id="jqeasypanel">
+	
+	<div id="copy">
+    	<p>{{experiment_description|safe|default:"No description available"}}</p>
+	    {# <p><a href="/db/labs">Back to Poms Labs homepage</a></a> #}
+    </div>
+
+	<!-- EXTRA AddThis Button BEGIN -->
+	<div class="addthis_toolbox addthis_default_style addthis_32x32_style" style="padding: 22px 20px 0px 0px;">
+	<a class="addthis_button_preferred_1"></a>
+	<a class="addthis_button_preferred_2"></a>
+	<a class="addthis_button_preferred_3"></a>
+	<a class="addthis_button_preferred_4"></a>
+	<a class="addthis_button_compact"></a>
+	<a class="addthis_counter addthis_bubble_style"></a>
+	</div>
+	<script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
+	<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4ff6b8ef6c166b00"></script>
+	<!-- AddThis Button END -->
+	
+</div>
+
+<div id="jqeasytrigger">
+    <a href="#" class="open">What is this?</a>
+    <a href="#" class="close">Close</a>
+</div>

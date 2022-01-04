@@ -1,0 +1,16 @@
+/* jQuery Easy Panel plugin
+ * Examples and documentation at: http://www.jqeasy.com/
+ * Version: 1.0 (31/03/2010)
+ * No license. Use it however you want. Just keep this notice included.
+ * Requires: jQuery v1.3+
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+(function(a){a.fn.jqEasyPanel=function(e){opts=a.extend({position:"top",height:"80px",speed:"normal",moveContainer:true,container:"#container",openBtn:".open",closeBtn:".close",openLink:".openpanel",closeLink:".closepanel",keepOpenCheck:"#keepopen",showTrigger:true,showOnLoad:false},e);var i=a(this);var h;var b={};var c={};if(opts.position=="top"){i.addClass("top");a("#jqeasytrigger").addClass("top");h="padding-top"}else{i.addClass("bottom");a("#jqeasytrigger").addClass("bottom");a("#jqeasypaneloptions").css("margin-right","14px");h="padding-bottom"}i.css("height",opts.height);var d=opts.height.replace("px","");d=parseInt(opts.height)+25;b[h]=d;c[h]=0;if(!opts.showTrigger){a("#jqeasytrigger").css("display","none");a("#jqeasypaneloptions").css("margin-right","14px");a("#jqeasypaneloptions").prepend('<p><a href="#" class="closepanel">Close Panel</a></p>')}if((g("jqEasyPanel")=="1")||(opts.showOnLoad)){if(opts.moveContainer){a(opts.container).css(h,d)}i.css({display:"block"});a(opts.openBtn).css({display:"none"});a(opts.closeBtn).css({display:"block"});a(opts.keepOpenCheck).attr("checked",true)}a(opts.openBtn).click(function(){i.slideDown(opts.speed);if(opts.moveContainer){a(opts.container).animate(b,opts.speed)}return false});a(opts.openLink).click(function(){i.slideDown(opts.speed);if(opts.moveContainer){a(opts.container).animate(b,opts.speed)}a(opts.openBtn).css({display:"none"});a(opts.closeBtn).css({display:"block"});return false});a(opts.closeBtn).click(function(){i.slideUp(opts.speed);if(opts.moveContainer){a(opts.container).animate(c,opts.speed)}return false});a(opts.closeLink).click(function(){i.slideUp(opts.speed);if(opts.moveContainer){a(opts.container).animate(c,opts.speed)}a(opts.openBtn).css({display:"block"});a(opts.closeBtn).css({display:"none"});return false});a("#jqeasytrigger a").click(function(){a("#jqeasytrigger a").toggle();return false});a(opts.keepOpenCheck).click(function(){if(a(opts.keepOpenCheck).attr("checked")){f("jqEasyPanel","1",0)}else{f("jqEasyPanel","0",0)}});function f(m,n,o){if(o){var l=new Date();l.setTime(l.getTime()+(o*24*60*60*1000));var k="; expires="+l.toGMTString()}else{var k=""}document.cookie=m+"="+n+k+"; path=/"}function g(l){var n=l+"=";var k=document.cookie.split(";");for(var m=0;m<k.length;m++){var o=k[m];while(o.charAt(0)==" "){o=o.substring(1,o.length)}if(o.indexOf(n)==0){return o.substring(n.length,o.length)}}return null}function j(k){f(k,"",-1)}}})(jQuery);

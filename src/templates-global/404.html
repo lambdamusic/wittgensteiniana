@@ -1,0 +1,95 @@
+<html>
+<head>
+<title></title>
+
+<style type="text/css" media="screen">
+.text {
+	color: grey;
+	font-size: 18px;
+}
+
+.text-bigger {
+	color: grey;
+	font-size: 26px;
+}
+</style>
+
+</head>
+
+<body topmargin="0" leftmargin="0">
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="980">
+  <tr>
+    <td width="980" height="90" colspan="3">
+
+    </td>
+  </tr>
+  <tr align="center">
+    <td width="160">
+
+
+    </td>
+	
+	
+    <td width="380">
+		{% if 0 %}
+		<img border="0" src="{{STATIC_URL}}custom/img/404-error.png" width="433" height="346">
+		{% endif %}
+		<br>
+    <br>
+	
+
+
+    <script language="JavaScript" type="text/javascript">
+    var count =300
+    var redirect="{% url appsmanager_home %}"
+
+    function countDown(){
+     if (count <=0){
+      window.location = redirect;
+     }else{
+      count--;
+      document.getElementById("timer").innerHTML = " "+count+" "
+      setTimeout("countDown()", 1000)
+     }
+    }
+    </script>
+
+	<p class="text-bigger">Sorry!
+		<br /><br />The page you requested doesn't exist.</p>
+		<br />
+	
+	<p class="text"><a class="go-back" href="javascript:history.go(-1)">&laquo; Go Back</a> <strong>OR</strong> <a class="go-home" href="{% url appsmanager_home %}">Go Home &raquo;</a></p>
+		
+	
+	<br /><br />
+	
+	<p class="text"><small>You will be redirected to the homepage in
+    <span id="timer" style="color:red;font-size: 12pt"><script>countDown();</script></span>
+	seconds.</small></p>	
+
+
+    <p align="center">&nbsp;</p>
+    </td>
+    <td width="300">
+
+
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" height="45">
+
+
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" height="45"><strong>&nbsp;</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3" height="45"></td>
+  </tr>
+</table>
+
+</body>
+
+</html>

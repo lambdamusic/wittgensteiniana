@@ -1,0 +1,112 @@
+{% extends "tractatusapp/onepager/base.html" %}
+
+
+{% block pagetitle %}Tractatus Logico-Philosophicus, Ludwig Wittgenstein{% endblock pagetitle %}
+
+
+
+{% block bodycontent %}
+
+
+		<div class="unitscloud text-center-fixed">
+			<a class="homelink" href="{% url 'tractatusapp:witt_about' %}">back</a>
+
+			<h3 style="font-size: 13px; margin-top: 20px;">Tractatus Logico-Philosophicus, Ludwig Wittgenstein
+
+					<small style="margin-left: 30px; color: black;">
+							Edition:
+							<select id="dynamic_select">
+								<option value="?version=ogden" {% ifequal currentversion 'ogden' %}selected{% endifequal %}>English (Ogden)</option>
+								<option value="?version=pears" {% ifequal currentversion 'pears' %}selected{% endifequal %}>English (Pears)</option>
+								<option value="?version=german" {% ifequal currentversion 'german' %}selected{% endifequal %}>German (original)</option>
+							</select>
+				</small>
+			</h3>
+
+			{% for unit in all_units  %}
+
+				<span>
+					<a href="#" class="activable"
+					{% ifequal currentversion "ogden" %}name="{{unit.textOgden|escape}}"{% endifequal %}
+					{% ifequal currentversion "pears" %}name="{{unit.textPears|escape}}"{% endifequal %}
+					{% ifequal currentversion "german" %}name="{{unit.textGerman|escape}}"{% endifequal %}><span {% ifchanged unit.name.0 %}class="biginitial"{% endifchanged %}>{{unit.name.0}}</span>{{unit.name|slice:"1:"}}</a>&nbsp;&nbsp;
+				</span>
+
+			{% endfor %}
+
+
+
+			<div id="highlight_space" style="margin-top: 50px;">
+				<span class="highlight_number"></span>
+				<br />
+				<span class="highlight_preview sentence"></span>
+
+				<!-- Go to www.addthis.com/dashboard to customize your tools -->
+				<div class="addthis_sharing_toolbox"  style="margin-top: 80px; margin-left: 10px; display: none;"></div>
+
+			</div>
+
+		</div>
+
+		</div>
+
+{% endblock bodycontent %}
+
+
+
+
+{% block global_js %}
+
+	<script>
+	    $(function(){
+	        $(".unitscloud a").mouseover(function() {
+				// console.log(this.text);
+				if ($(this).hasClass("activable")) {
+					var preview = this.name;
+					$("span.highlight_number").text(this.text);  // = the number
+					$("span.highlight_preview").html(preview);
+				}
+		   })
+		   .mouseout(function() {
+			   if (($(this).hasClass("activable"))) {
+			       $("span.highlight_number").text("");
+			       $("span.highlight_preview").html("");
+			   }
+		   });
+
+		   $(".unitscloud a").click(function() {
+			   if ($(this).hasClass("activable")) {
+				   $(".unitscloud a").removeClass("activable");
+				   $(".unitscloud a").removeClass("active");
+				   $(this).addClass("active");
+				   $(".addthis_sharing_toolbox").show();
+
+			   } else {
+				   $(".unitscloud a").addClass("activable");
+				   $(".unitscloud a").removeClass("active");
+				   $(this).removeClass("active");
+				   $(".addthis_sharing_toolbox").hide();
+			   };
+		   });
+	   });
+	</script>
+
+
+<script type="text/javascript">
+
+	$(function(){
+			// bind change event to select
+			$('#dynamic_select').on('change', function () {
+					var url = $(this).val(); // get selected value
+					if (url) { // require a URL
+							window.location = url; // redirect
+					}
+					return false;
+			});
+		});
+
+</script>
+
+
+
+{% endblock global_js %}

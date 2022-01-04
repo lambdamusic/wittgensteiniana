@@ -1,0 +1,48 @@
+{% load extrafilters %}
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+  <head>
+
+
+	<title>Whole text</title>
+</head>
+  
+  <body style="font-size: {{fontsize}}">
+
+
+		{% for unit in units  %}
+
+			<div style="margin-left: {{unit.level|calc_margin}}px;}}">
+			<h1>{{unit.name}}</h1>
+
+
+			{% with unit.hascontents.all.0 as text  %}
+			
+				{# {% for expression in text.in_expression.all  %} #}
+				{# 		{{expression.title|upper}} #}
+					{{text.contents|safe}}
+				{# {% endfor %} #}
+				
+			{% endwith %}
+			
+						{# OLD CODE THAT SHOWS ALL EXPRESSSIONS #}
+						{# {% for text in unit.hascontents.all  %} #}
+						{#  #}
+						{# 	{% for expression in text.in_expression.all  %} #}
+						{# 		{{expression.title|upper}} #}
+						{# 		{{text.contents|safe}} #}
+						{# 	{% endfor %} #}
+						{# 	 #}
+						{# {% endfor %} #}
+			</div>
+			
+
+		{% endfor %}
+
+
+  </body>
+</html>
+

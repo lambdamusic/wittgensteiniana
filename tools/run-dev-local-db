@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+export ENVIRONMENT=local
+
+cd src
+python manage.py runserver_plus

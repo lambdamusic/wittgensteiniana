@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+
+#
+# load DB data
+#
+
+
+echo "================="
+echo "LOAD DATA FROM LOCAL JSON DUMP"
+echo "Please pass a JSON file in backups/ and ensure DB is initialised and empty"
+echo "================="
+
+
+src/manage.py loaddata $1
+
+echo "DONE"
+

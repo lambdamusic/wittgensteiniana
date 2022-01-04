@@ -1,0 +1,355 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+<html>
+  <head>
+
+	<style type="text/css">
+
+	/*index page */
+
+	div.unitscloud {font-size: 9px; padding: 35px; color: darkblue; text-align: justify;}
+	div.unitscloud a:link  {text-decoration: none; color: blue;}
+	div.unitscloud a:visited {text-decoration: none; color: blue;}
+	div.unitscloud a:active {text-decoration: none; color: blue;}
+	div.unitscloud a:hover {background: darkblue; color: white;}
+
+	.centered {
+	  position: fixed;
+	  top: 20%;
+	  left: 25%;
+	  right: 25%;
+	}
+
+	.highlight_number {
+		font-size: 80px;
+		color: #CACACA;
+	}
+	.highlight_preview {
+		font-size: 20px;
+		color: #CACACA;
+	}
+
+
+
+
+	/* sentence page*/
+
+
+	.sentence {
+		font-family: monospace;
+		font-size: 30px;
+		padding: 40px;
+		line-height: 39px;
+		color: rgb(112, 112, 137);
+		display: inline-block;
+	}
+
+
+	.sentence table {
+		font-family: monospace;
+		font-size: 25px;
+		padding: 40px;
+		line-height: 39px;
+		color: rgb(112, 112, 137);
+		display: inline-block;
+	}
+
+
+	div.centered, table.truthtable {
+		position: relative;
+	}
+
+
+	.text-center {
+		position: relative;
+		/*margin-top: 5%;*/
+		margin-left: 23%;
+		margin-right: 21%;
+	}
+
+	.text-center-fixed {
+	  position: fixed;
+	  top: 20%;
+	  left: 25%;
+	  right: 25%;
+
+	}
+
+  .top-title {
+    padding-left: 40px;
+  }
+  .top-title a {
+    text-decoration: none;
+    color: lightgray;
+  }
+  .top-title a:hover {
+    text-decoration: underline;
+  }
+
+	.navigation-div {
+	    text-align: right;
+	    padding: 40px;
+	    color: darkgrey; /*default*/
+		margin-right: 40px;
+	}
+
+	p.citation {
+		font-size: 15px;
+		color: #807E7E;
+	}
+	p.citation .citationtitle {
+		font-size: 20px;
+		color: black;
+	}
+	p.citation .citationauthor {
+		text-transform: uppercase;
+	    font-size: 11px;
+	    font-weight: bold;
+	    color: darkcyan;
+	}
+
+	p.citation a:link {text-decoration: none; color: #807E7E; }
+	p.citation a:visited {text-decoration: none; color: #807E7E;}
+	p.citation a:hover {text-decoration: underline; color: blue;}
+
+
+
+	p.navigation-links {
+		font-size: 12px;
+	}
+	p.navigation-links a:link {text-decoration: none; color: darkblue; }
+	p.navigation-links a:visited {text-decoration: none; color: darkblue;}
+	p.navigation-links a:hover {text-decoration: underline; color: blue;}
+
+
+	p.edition {
+		font-style: italic;
+		font-size: 12px;
+		margin-top: 20px;
+	}
+	p.edition a:link {text-decoration: none; color: #807E7E; }
+	p.edition a:visited {text-decoration: none; color: #807E7E;}
+	p.edition a:hover {text-decoration: underline; color: black;}
+	p.edition a.active_version {
+	    text-decoration: underline;
+		color: black;
+	}
+
+
+
+	hr {
+	    border-color: #ffffff; /* lightsteelblue; */
+	    border-width: 0.1em;
+		margin-left:0;  /*http://www.w3schools.com/tags/att_hr_align.asp*/
+		text-align:left;
+		width: 100%;
+	}
+
+
+	#navigation_bottom {
+		text-align: left;
+		margin-top: 60px;
+		padding: 40px;
+	}
+
+
+
+
+/*typer stuff*/
+
+	.typed-cursor{
+	    opacity: 1;
+	    -webkit-animation: blink 0.7s infinite;
+	    -moz-animation: blink 0.7s infinite;
+	    animation: blink 0.7s infinite;
+	}
+	@keyframes blink{
+	    0% { opacity:1; }
+	    50% { opacity:0; }
+	    100% { opacity:1; }
+	}
+	@-webkit-keyframes blink{
+	    0% { opacity:1; }
+	    50% { opacity:0; }
+	    100% { opacity:1; }
+	}
+	@-moz-keyframes blink{
+	    0% { opacity:1; }
+	    50% { opacity:0; }
+	    100% { opacity:1; }
+	}
+
+
+	</style>
+
+	<title>
+	2.024: Substance is what exists independently of what is the case.
+	</title>
+
+</head>
+
+  <body>
+
+	  
+
+		<div class="text-center top-title">
+
+
+		
+
+		<h3 style="font-size: 13px; margin-top: 20px;"><a href="../../typewriter.html" title="Back to text overview">Tractatus Logico-Philosophicus, Ludwig Wittgenstein</a>
+
+				
+				<small style="margin-left: 30px; color: black;">
+						Edition:
+						<select id="dynamic_select">
+							<option value="/typewriter/2.024/ogden/" selected>English (Ogden)</option>
+							<option value="/typewriter/2.024/pears/" >English (Pears)</option>
+							<option value="/typewriter/2.024/german/" >German (original)</option>
+						</select>
+			</small>
+		</h3>
+
+
+
+	</div>
+
+
+	<div class="text-center">
+
+
+
+		<span class="sentence">
+		</span>
+		
+
+		<div id="navigation-div" class="navigation-div" style="display: none;">
+
+			<p class="navigation-links">
+
+				Go to:&nbsp;&nbsp;
+				
+					<a id="prevbutton" title="2.023" href="../2.023/index.html">Previous Sentence</a>
+				
+				
+					&nbsp;|&nbsp;
+					<a id="nextbutton" title="2.025" href="../2.025/index.html">Next Sentence</a>
+				
+				<br />
+				Tip: arrow keys welcome!
+				<br /><br />
+				<a title="index" href="../../typewriter.html">Index</a>
+				&nbsp;|&nbsp;
+				<a title="about" href="../../index.html">Home</a>
+				<br />
+
+
+
+
+
+
+
+			</p>
+
+
+
+
+		</div>
+
+
+
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-2000254-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-2000254-3');
+</script>
+
+
+<script src="../../media/static/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="../../media/static/libs/type.js/typed.min.js"></script>
+
+
+
+
+
+
+
+	<script>
+	    $(function(){
+	        $(".sentence").typed({
+	            strings: ['2.024<br /><br /><div class="ogd">Substance is what exists independently of what is the case.</div>',],
+				// https://github.com/mattboldt/typed.js/issues/238
+	            typeSpeed: -50,
+				showCursor: false,  // to avoig bug: https://github.com/mattboldt/typed.js/issues/66
+				contentType: 'html',
+				callback: function() {
+					$("#navigation-div").fadeIn(1000);
+					// $("#navigation_bottom").fadeIn(4000, 'linear');
+				},
+	        });
+	    });
+
+
+		$(document).keydown(function(e) {
+		    switch(e.which) {
+		        case 37: // left
+					$("#prevbutton")[0].click();
+		        break;
+		        //
+		        // case 38: // up
+		        // break;
+
+		        case 39: // right
+					$("#nextbutton")[0].click();
+		        break;
+
+		        // case 40: // down
+		        // break;
+
+		        default: return; // exit this handler for other keys
+		    }
+		    e.preventDefault(); // prevent the default action (scroll / move caret)
+		});
+
+
+
+    $(function(){
+	      // bind change event to select
+	      $('#dynamic_select').on('change', function () {
+	          var url = $(this).val(); // get selected value
+	          if (url) { // require a URL
+	              window.location = url; // redirect
+	          }
+	          return false;
+	      });
+	    });
+
+
+	</script>
+
+
+
+
+
+  </body>
+</html>

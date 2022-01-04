@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+
+
+echo "================="
+echo "PREREQUISITE"
+echo "Ensure site is running on 127.0.0.1:8000..."
+echo "================="
+
+
+if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null ; then
+    echo ">>>>>>> DJANGO is RUNNING! "
+    echo "================="
+else
+    echo "********* Django not running on 127.0.0.1:8000 **********"
+    echo ".. Exiting process. Please run the django server first."
+    exit 1
+fi
+
+
+echo "================="
+echo "Dumping site.."
+echo "================="
+
+./tools/site-dump
+
+
+echo "================="
+echo -e "\nCommit and push"
+echo "================="
+
+git add -A 
+git commit -m "live site auto update"
+git push
+
+
+echo -e "\rDone"
+echo "================="

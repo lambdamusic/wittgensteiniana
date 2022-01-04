@@ -1,0 +1,17 @@
+
+#
+# backup DB data
+#
+
+
+
+DIR_DB_BACKUP="backups/django"
+
+
+echo -e "\nBACKING UP DB DATA ....src/manage.py dumpdata TO /$DIR_DB_BACKUP"
+echo "+++++++++++++++++"
+
+FILENAME="$DIR_DB_BACKUP/dump.json"
+src/manage.py dumpdata --exclude auth.permission --exclude contenttypes --exclude sessions --indent=4 > $FILENAME
+
+echo -e "\nDONE: $FILENAME\n"

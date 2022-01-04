@@ -1,0 +1,144 @@
+{% extends "tractatusapp/typewriter/base.html" %}
+
+
+{% block pagetitle %}{{unit.name}}: {{text|striptags|truncatewords:10}}{% endblock pagetitle %}
+
+
+
+{% block bodycontent %}
+
+		<div class="text-center top-title">
+
+
+		{# <a class="homelink" href="{% url witt_about %}">back</a>#}
+
+		<h3 style="font-size: 13px; margin-top: 20px;"><a href="{% url 'tractatusapp:indexsentence' %}" title="Back to text overview">Tractatus Logico-Philosophicus, Ludwig Wittgenstein</a>
+
+				{# <small>&nbsp;&nbsp;&nbsp;<a class="-homelink" href="{% url witt_about %}">home</a></small>#}
+				<small style="margin-left: 30px; color: black;">
+						Edition:
+						<select id="dynamic_select">
+							<option value="{% url 'tractatusapp:get_sentence_version' unit.name 'ogden' %}" {% ifequal currentversion 'ogden' %}selected{% endifequal %}>English (Ogden)</option>
+							<option value="{% url 'tractatusapp:get_sentence_version' unit.name 'pears' %}" {% ifequal currentversion 'pears' %}selected{% endifequal %}>English (Pears)</option>
+							<option value="{% url 'tractatusapp:get_sentence_version' unit.name 'german' %}" {% ifequal currentversion 'german' %}selected{% endifequal %}>German (original)</option>
+						</select>
+			</small>
+		</h3>
+
+
+
+	</div>
+
+
+	<div class="text-center">
+
+
+
+		<span class="sentence">
+		</span>
+		{# {{text|safe}} #}
+
+		<div id="navigation-div" class="navigation-div" style="display: none;">
+
+			<p class="navigation-links">
+
+				Go to:&nbsp;&nbsp;
+				{% if prev %}
+					<a id="prevbutton" title="{{prev.name}}" href="{% url 'tractatusapp:get_sentence_version' prev.name currentversion %}">Previous Sentence</a>
+				{% endif %}
+				{% if next %}
+					{% if prev %}&nbsp;|&nbsp;{% endif %}
+					<a id="nextbutton" title="{{next.name}}" href="{% url 'tractatusapp:get_sentence_version' next.name currentversion %}">Next Sentence</a>
+				{% endif %}
+				<br />
+				Tip: arrow keys welcome!
+				<br /><br />
+				<a title="index" href="{% url 'tractatusapp:indexsentence' %}">Index</a>
+				&nbsp;|&nbsp;
+				<a title="about" href="{% url 'tractatusapp:witt_about' %}">Home</a>
+				<br />
+
+
+
+
+
+
+
+			</p>
+
+
+
+
+		</div>
+
+
+
+	</div>
+
+
+
+
+
+
+{% endblock bodycontent %}
+
+
+
+{% block global_js %}
+
+	<script>
+	    $(function(){
+	        $(".sentence").typed({
+	            strings: ['{{unit.name}}<br /><br />{{text|safe}}',],
+				// https://github.com/mattboldt/typed.js/issues/238
+	            typeSpeed: -50,
+				showCursor: false,  // to avoig bug: https://github.com/mattboldt/typed.js/issues/66
+				contentType: 'html',
+				callback: function() {
+					$("#navigation-div").fadeIn(1000);
+					// $("#navigation_bottom").fadeIn(4000, 'linear');
+				},
+	        });
+	    });
+
+
+		$(document).keydown(function(e) {
+		    switch(e.which) {
+		        case 37: // left
+					$("#prevbutton")[0].click();
+		        break;
+		        //
+		        // case 38: // up
+		        // break;
+
+		        case 39: // right
+					$("#nextbutton")[0].click();
+		        break;
+
+		        // case 40: // down
+		        // break;
+
+		        default: return; // exit this handler for other keys
+		    }
+		    e.preventDefault(); // prevent the default action (scroll / move caret)
+		});
+
+
+
+    $(function(){
+	      // bind change event to select
+	      $('#dynamic_select').on('change', function () {
+	          var url = $(this).val(); // get selected value
+	          if (url) { // require a URL
+	              window.location = url; // redirect
+	          }
+	          return false;
+	      });
+	    });
+
+
+	</script>
+
+
+
+{% endblock global_js %}

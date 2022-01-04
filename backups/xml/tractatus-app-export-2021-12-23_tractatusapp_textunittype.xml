@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+-
+- Sequel Ace XML dump
+- Version 20016
+-
+- https://sequel-ace.com/
+- https://github.com/Sequel-Ace/Sequel-Ace
+-
+- Host: 127.0.0.1 (MySQL 8.0.27)
+- Database: hacks-legacy
+- Generation Time Time: 2021-12-23 12:52:28 +0000
+-
+-->
+
+<mysqldump xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<database name="hacks-legacy">
+
+	<table_structure name="tractatusapp_textunittype">
+		<field field="id" type="{length = 3, bytes = 0x696e74}" null="NO" key="{length = 3, bytes = 0x505249}" default="<null>" extra="auto_increment" />
+		<field field="created_at" type="{length = 8, bytes = 0x6461746574696d65}" null="NO" key="{length = 0, bytes = 0x}" default="<null>" extra="" />
+		<field field="updated_at" type="{length = 8, bytes = 0x6461746574696d65}" null="NO" key="{length = 0, bytes = 0x}" default="<null>" extra="" />
+		<field field="editedrecord" type="{length = 10, bytes = 0x74696e79696e74283129}" null="NO" key="{length = 0, bytes = 0x}" default="<null>" extra="" />
+		<field field="review" type="{length = 10, bytes = 0x74696e79696e74283129}" null="NO" key="{length = 0, bytes = 0x}" default="<null>" extra="" />
+		<field field="internal_notes" type="{length = 8, bytes = 0x6c6f6e6774657874}" null="NO" key="{length = 0, bytes = 0x}" default="<null>" extra="" />
+		<field field="created_by_id" type="{length = 3, bytes = 0x696e74}" null="YES" key="{length = 3, bytes = 0x4d554c}" default="<null>" extra="" />
+		<field field="updated_by_id" type="{length = 3, bytes = 0x696e74}" null="YES" key="{length = 3, bytes = 0x4d554c}" default="<null>" extra="" />
+		<field field="name" type="{length = 12, bytes = 0x766172636861722831303029}" null="NO" key="{length = 0, bytes = 0x}" default="<null>" extra="" />
+		<field field="description" type="{length = 8, bytes = 0x6c6f6e6774657874}" null="NO" key="{length = 0, bytes = 0x}" default="<null>" extra="" />
+
+		<options name="tractatusapp_textunittype" engine="InnoDB" version="10" row_format="{length = 7, bytes = 0x44796e616d6963}" rows="0" avg_row_length="0" data_length="16384" max_data_length="0" index_length="32768" data_free="0" create_time="2021-12-23 12:15:12" update_time="2021-12-23 12:15:12" collation="utf8_general_ci" create_options="" comment="" />
+	</table_structure>
+
+	<table_data name="tractatusapp_textunittype">
+
+	<row>
+		<field name="id">1</field>
+		<field name="created_at">2011-10-03 01:48:04</field>
+		<field name="updated_at">2011-10-03 01:48:04</field>
+		<field name="editedrecord">0</field>
+		<field name="review">0</field>
+		<field name="internal_notes"></field>
+		<field name="created_by_id" xsi:nil="true" />
+		<field name="updated_by_id" xsi:nil="true" />
+		<field name="name">paragraph</field>
+		<field name="description"></field>
+	</row>
+
+	</table_data>
+
+</database>
+</mysqldump>

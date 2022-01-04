@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+cd src 
+
+python manage.py makemigrations
+
+python manage.py migrate
+
+echo "from django.contrib.auth.models import User; User.objects.create_superuser('NAME', 'EMAIL', 'PSQ')" | python manage.py shell
+
+echo "SUPERUSER CREATED: 'NAME'"

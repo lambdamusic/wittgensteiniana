@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+echo "================="
+echo "PREREQUISITE"
+echo "Ensure site is running on 127.0.0.1:8000..."
+echo "================="
+
+
+if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null ; then
+    echo ">>>>>>> DJANGO is RUNNING! "
+    echo "================="
+else
+    echo "********* Django not running **********"
+    echo ".. Exiting process. Please run the django server first."
+    exit 1
+fi
+
+
+
+#
+# Folders ignored from build:
+# - assets: managed manually for static files 
+# - archived: contains legacy content which is unchanged 
+#
+
+
+
+#
+# prep
+#
+
+
+DIR_BUILD="build"
+DIR_DOCS="docs"
+
+
+#
+# get HTML site from local Django 
+#
+
+echo -e "\nCLEAN UP TEMP BUILD DIR.."
+echo "+++++++++++++++++"
+rm -rf $DIR_BUILD/*
+
+echo -e "\nWGET SITE INTO TEMP BUILD DIRECTORY.." 
+echo "+++++++++++++++++"
+wget  -P $DIR_BUILD -mkEpnp -nH http://127.0.0.1:8000/ --wait=0.1
+
+# add a log file
+cd $DIR_BUILD
+touch "$(date +"%Y_%m_%d_%I_%M_%p").log"
+cd ..
+
+
+#
+# save HTML site to docs folder
+#
+
+echo -e "\nRSYNC TEMP BUILD DIRECTORY INTO FINAL LOCATION:  /$DIR_DOCS"
+echo "+++++++++++++++++"
+rsync -av --delete --exclude '.nojekyll' --exclude 'CNAME' --exclude archived --exclude assets $DIR_BUILD/ $DIR_DOCS/
+
+
+
+
+# WGET HOWTO
+# https://www.gnu.org/software/wget/manual/wget.html
+
+# -   `--mirror` – Makes (among other things) the download recursive.
+# -   `--convert-links` – convert all the links (also to stuff like CSS stylesheets) to relative, so it will be suitable for offline viewing.
+# -   `--adjust-extension` – Adds suitable extensions to filenames (`html` or `css`) depending on their content-type.
+# -   `--page-requisites` – Download things like CSS style-sheets and images required to properly display the page offline.
+# -   `--no-parent` – When recursing do not ascend to the parent directory. It useful for restricting the download to only a portion of the site.
+# -  `--no-host-directories` – Disable generation of host-prefixed directories. By default, invoking Wget with ‘-r http://fly.srk.fer.hr/’ will create a structure of directories beginning with fly.srk.fer.hr/. This option disables such behavior.
+# -  `--wait` – Waiting time between calls. Set reasonable or random waiting times between two downloads to avoid the Connection closed by peer error.
+
