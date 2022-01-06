@@ -1,17 +1,12 @@
 # Wittgensteiniana
 
-Exploration tool Wittgenstein works. 
+Experimental visualizations of Wittgenstein's Tractatus.
 
-More info: https://www.michelepasin.org/projects/wittgensteiniana/index.html
-
-
-> APP CURRENTLY OFFLINE DUE TO UPGRADES
+> The [Tractatus Logico-Philosophicus](http://en.wikipedia.org/wiki/Tractatus_Logico-Philosophicus) (Latin for "Logical-Philosophical Treatise") is the only book-length philosophical work published by the Austrian philosopher Ludwig Wittgenstein in his lifetime. It was an ambitious project: to identify the relationship between language and reality and to define the limits of science. It is recognized as a significant philosophical work of the twentieth century. […] The Tractatus employs a notoriously austere and succinct literary style. The work contains almost no arguments as such, but rather declarative statements which are meant to be self-evident. The statements are hierarchically numbered, with seven basic propositions at the primary level (numbered 1–7), with each sub-level being a comment on or elaboration of the statement at the next higher level (e.g., 1, 1.1, 1.11, 1.12).
 
 ## Tech info
 
 This is a Django app which is mirrored in local using `wget` and rendered as a static site in /docs.
-
-To experience all the app functionalities, it should be run using Django and a web server. 
 
 The `docs` folder contains a static version of the site, which is accessible at: 
 
@@ -21,3 +16,5 @@ The `docs` folder contains a static version of the site, which is accessible at:
 ## Status
 
 This project is here for documentation purposes and is no longer under development.
+
+Background info: https://www.michelepasin.org/projects/wittgensteiniana/index.html
