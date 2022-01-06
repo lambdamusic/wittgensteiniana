@@ -50,13 +50,11 @@
 					{% if prev %}&nbsp;|&nbsp;{% endif %}
 					<a id="nextbutton" title="{{next.name}}" href="{% url 'tractatusapp:get_sentence_version' next.name currentversion %}">Next Sentence</a>
 				{% endif %}
-				<br />
-				Tip: arrow keys welcome!
+
+				&nbsp;|&nbsp;&nbsp;<a title="index" href="{% url 'tractatusapp:indexsentence' %}">Index</a>
+
 				<br /><br />
-				<a title="index" href="{% url 'tractatusapp:indexsentence' %}">Index</a>
-				&nbsp;|&nbsp;
-				<a title="about" href="{% url 'tractatusapp:witt_about' %}">Home</a>
-				<br />
+				Tip: Arrow Keys Welcome!
 
 
 

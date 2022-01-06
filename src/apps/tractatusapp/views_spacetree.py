@@ -99,6 +99,7 @@ def spacetree(request):
 
 
 
+
 def generate_text(instance, expression="ogden"):
 	""" creates the html needed for the full text representation of the tractatus
 		includes the number-title, and small links to next and prev satz
@@ -119,5 +120,12 @@ def generate_text(instance, expression="ogden"):
 			next = "<a title='Next Sentence' href='javascript:focus_node(%s);'>&rarr; %s</a>" % (next_satz.name, next_satz.name) 
 		if prev_satz:
 			prev = "<a title='Previous Sentence' href='javascript:focus_node(%s);'>%s &larr;</a>" % (prev_satz.name, prev_satz.name)
-		t = "<div class='tnum'><span class='smalllinks'>%s</span>%s<span class='smalllinks'>%s</span></div>%s" % (prev, instance.name, next, instance.textOgden())
+
+		# HACK src images rendered via JS in the template cause WGET errors
+		# hence they are hidden away in this visualization
+		# TODO find a more elegant solution
+		text_js_ready = instance.textOgden().replace('src="', '-src=\"src image omitted ')
+
+		t = "<div class='tnum'><span class='smalllinks'>%s</span>%s<span class='smalllinks'>%s</span></div>%s" % (prev, instance.name, next, text_js_ready)
 		return t
+
