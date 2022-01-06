@@ -22205,7 +22205,7 @@
         "created_by": null,
         "updated_by": null,
         "isprivate": false,
-        "contents": "<div class=\"ogd\">To perceive a complex means to perceive that its constituents are combined in such and such a way.</div><div class=\"ogd\">This perhaps explains that the figure <div class=\"centered\"><img src=\"http://hacks.michelepasin.org/media/hacks/custom/tractatusapp/img/thecube.svg\" alt=\"Cube with a face and b face\" class=\"thecubepng\" /></div> can be seen in two ways as a cube; and all similar phenomena. For we really see two different facts. (If I fix my eyes first on the corners <em>a</em> and only glance at <em>b</em>, <em>a</em> appears in front and <em>b</em> behind, and vice versa.)</div>",
+        "contents": "<div class=\"ogd\">To perceive a complex means to perceive that its constituents are combined in such and such a way.</div><div class=\"ogd\">This perhaps explains that the figure <div class=\"centered\"><img src=\"/media/static/custom/tractatusapp/img/thecube.svg\" alt=\"Cube with a face and b face\" class=\"thecubepng\" /></div> can be seen in two ways as a cube; and all similar phenomena. For we really see two different facts. (If I fix my eyes first on the corners <em>a</em> and only glance at <em>b</em>, <em>a</em> appears in front and <em>b</em> behind, and vice versa.)</div>",
         "language": 1,
         "in_expression": [
             3
@@ -22661,7 +22661,7 @@
         "created_by": null,
         "updated_by": null,
         "isprivate": false,
-        "contents": "<div class=\"ogd\">For the field of sight has not a form like this: <div class=\"centered\"><span class=\"sfmiddle\"><span class=\"lowered\">Eye —</span><img src=\"http://hacks.michelepasin.org/media/hacks/custom/tractatusapp/img/theeye.svg\" alt=\"Eye image\" class=\"theeyepng\" /></div></div>",
+        "contents": "<div class=\"ogd\">For the field of sight has not a form like this: <div class=\"centered\"><span class=\"sfmiddle\"><span class=\"lowered\">Eye —</span><img src=\"/media/static/custom/tractatusapp/img/theeye.svg\" alt=\"Eye image\" class=\"theeyepng\" /></div></div>",
         "language": 1,
         "in_expression": [
             3
@@ -23839,7 +23839,7 @@
         "created_by": null,
         "updated_by": null,
         "isprivate": false,
-        "contents": "<div class=\"ogd\">The law of causality is not a law but the form of a law.<a href=\"http://people.umass.edu/phil335-klement-2/tlp/footnotes.html#fn2ogden\" id=\"fn2marker\">†</a></div>",
+        "contents": "<div class=\"ogd\">The law of causality is not a law but the form of a law.</div>",
         "language": 1,
         "in_expression": [
             3
@@ -32199,7 +32199,7 @@
         "created_by": null,
         "updated_by": null,
         "isprivate": false,
-        "contents": "<div class=\"pmc\">To perceive a complex means to perceive that its constituents are related to one another in such and such a way.</div><div class=\"pmc\">This no doubt also explains why there are two possible ways of seeing the figure <div class=\"centered\"><img src=\"http://hacks.michelepasin.org/media/hacks/custom/tractatusapp/img/thecube.svg\" alt=\"Cube with a face and b face\" class=\"thecubepng\" /></div> as a cube; and all similar phenomena. For we really see two different facts.(If I look in the first place at the corners marked <em>a</em> and only glance at <em>b</em>&#39;s, then the <em>a</em>&#39;s appear to be in front, and <em>vice versa</em>).</div>",
+        "contents": "<div class=\"pmc\">To perceive a complex means to perceive that its constituents are related to one another in such and such a way.</div><div class=\"pmc\">This no doubt also explains why there are two possible ways of seeing the figure <div class=\"centered\"><img src=\"/media/static/custom/tractatusapp/img/thecube.svg\" alt=\"Cube with a face and b face\" class=\"thecubepng\" /></div> as a cube; and all similar phenomena. For we really see two different facts.(If I look in the first place at the corners marked <em>a</em> and only glance at <em>b</em>&#39;s, then the <em>a</em>&#39;s appear to be in front, and <em>vice versa</em>).</div>",
         "language": 1,
         "in_expression": [
             4
@@ -32655,7 +32655,7 @@
         "created_by": null,
         "updated_by": null,
         "isprivate": false,
-        "contents": "<div class=\"pmc\">For the form of the visual field is surely not like this <div class=\"centered\"><span class=\"sfmiddle\"><span class=\"lowered\">Eye —</span><img src=\"http://hacks.michelepasin.org/media/hacks/custom/tractatusapp/img/theeye.svg\" alt=\"Eye image\" class=\"theeyepng\" /></div></div>",
+        "contents": "<div class=\"pmc\">For the form of the visual field is surely not like this <div class=\"centered\"><span class=\"sfmiddle\"><span class=\"lowered\">Eye —</span><img src=\"/media/static/custom/tractatusapp/img/theeye.svg\" alt=\"Eye image\" class=\"theeyepng\" /></div></div>",
         "language": 1,
         "in_expression": [
             4
@@ -42193,7 +42193,7 @@
         "created_by": null,
         "updated_by": null,
         "isprivate": false,
-        "contents": "<div class=\"ger\">Einen Komplex wahrnehmen heißt wahrnehmen, dass sich seine Bestandteile so und so zu einander verhalten.</div><div class=\"ger\">Dies erklärt wohl auch, dass man die Figur <div class=\"centered\"><img src=\"http://hacks.michelepasin.org/media/hacks/custom/tractatusapp/img/thecube.svg\" alt=\"Cube with a face and b face\" class=\"thecubepng\" /></div>auf zweierlei Art als Würfel sehen kann; und alle ähnlichen Erscheinungen. Denn wir sehen eben wirklich zwei verschiedene Tatsachen. (Sehe ich erst auf die Ecken <em>a</em> und nur flüchtig auf <em>b</em>, so erscheint <em>a</em> vorne; und umgekehrt.)</div>",
+        "contents": "<div class=\"ger\">Einen Komplex wahrnehmen heißt wahrnehmen, dass sich seine Bestandteile so und so zu einander verhalten.</div><div class=\"ger\">Dies erklärt wohl auch, dass man die Figur <div class=\"centered\"><img src=\"/media/static/custom/tractatusapp/img/thecube.svg\" alt=\"Cube with a face and b face\" class=\"thecubepng\" /></div>auf zweierlei Art als Würfel sehen kann; und alle ähnlichen Erscheinungen. Denn wir sehen eben wirklich zwei verschiedene Tatsachen. (Sehe ich erst auf die Ecken <em>a</em> und nur flüchtig auf <em>b</em>, so erscheint <em>a</em> vorne; und umgekehrt.)</div>",
         "language": 2,
         "in_expression": [
             5
@@ -42649,7 +42649,7 @@
         "created_by": null,
         "updated_by": null,
         "isprivate": false,
-        "contents": "<div class=\"ger\">Das Gesichtsfeld hat nämlich nicht etwa eine solche Form: <div class=\"centered\"><span class=\"sfmiddle\"><span class=\"lowered\">Auge —</span><img src=\"http://hacks.michelepasin.org/media/hacks/custom/tractatusapp/img/theeye.svg\" alt=\"Eye image\" class=\"theeyepng\" /></div></div>",
+        "contents": "<div class=\"ger\">Das Gesichtsfeld hat nämlich nicht etwa eine solche Form: <div class=\"centered\"><span class=\"sfmiddle\"><span class=\"lowered\">Auge —</span><img src=\"/media/static/custom/tractatusapp/img/theeye.svg\" alt=\"Eye image\" class=\"theeyepng\" /></div></div>",
         "language": 2,
         "in_expression": [
             5
