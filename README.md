@@ -15,6 +15,6 @@ The `docs` folder contains a static version of the site, which is accessible at:
 
 ## Status
 
-This project is here for documentation purposes and is no longer under development.
+This project is not actively developed anymore, but every once in a while new visualizations may be added.
 
 Background info: https://www.michelepasin.org/projects/wittgensteiniana/index.html

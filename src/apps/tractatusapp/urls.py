@@ -7,6 +7,7 @@ from . import views_onepager
 from . import views_typewriter
 from . import views_spacetree
 from . import views_d3tree
+from . import views_depthtree
 
 app_name = 'tractatusapp'
 urlpatterns = [
@@ -36,6 +37,12 @@ urlpatterns = [
    # SPACETREE
    # =========
    url(r'^spacetree$', views_spacetree.spacetree, name='spacetree'),
+
+
+
+   # DEPTH-RHYTHM TIMELINE
+   # =========
+   url(r'^depthtree$', views_depthtree.index, name='depthtree'),
 
 
 

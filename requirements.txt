@@ -1,4 +1,5 @@
 django<4.0.0
+django-mptt
 django-extensions
 Werkzeug
 click
