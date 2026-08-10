@@ -1,0 +1,157 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'tractatusapp/ga.html' %}
+
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+	<title>Heartbeat Strip Tractatus</title>
+
+	<script type="text/javascript" src="{% static 'custom/tractatusapp/vendor/d3.v7.min.js' %}"></script>
+
+	<style type="text/css">
+
+		html, body { margin: 0; padding: 0; background: #0b0f0b; color: #cde; font-family: arial, sans-serif; }
+
+		#header { padding: 15px 20px 5px 20px; }
+		#header h1 { margin: 0 0 5px 0; font-size: 22px; color: #a7e0a7; }
+		#header .homelink { font-size: 11px; color: #8ab4d8; }
+		#description { padding: 0 20px 10px 20px; font-size: 13px; color: #9bb; line-height: 1.5; }
+
+		#chart-container { position: relative; padding: 0 20px; }
+
+		.pulse-line { fill: none; stroke-width: 1.4px; }
+		.row-label { font-size: 12px; font-weight: bold; }
+		.hit-target { fill: transparent; }
+
+		#tooltip {
+			position: absolute;
+			pointer-events: none;
+			background: rgba(230, 250, 230, 0.96);
+			color: #111;
+			padding: 8px 10px;
+			border-radius: 4px;
+			font-size: 12px;
+			line-height: 1.4;
+			max-width: 320px;
+			display: none;
+		}
+		#tooltip b { color: #1a6b1a; }
+
+		#subfooter {
+			margin: 20px 20px 40px 20px;
+			font-size: 11px;
+			color: #566;
+		}
+
+	</style>
+</head>
+
+
+<body>
+
+	<div id="header">
+		<h1>The Heartbeat Strip
+			<a class="homelink" href="{% url 'tractatusapp:witt_about' %}">home</a>
+		</h1>
+	</div>
+
+	<div id="description">{{ experiment_description|safe }}</div>
+
+	<div id="chart-container">
+		<svg id="chart"></svg>
+		<div id="tooltip"></div>
+	</div>
+
+	<div id="subfooter">
+		Ludwig Wittgenstein, Tractatus Logico-Philosophicus, 1921. Translated from the German by C.K. Ogden, 1922.
+	</div>
+
+
+	<script type="text/javascript">
+
+		var CHAPTERS = {{ json|safe }};
+
+		var margin = { top: 10, right: 20, bottom: 10, left: 60 },
+			width = Math.max(900, window.innerWidth - margin.left - margin.right - 40),
+			rowHeight = 90,
+			height = rowHeight * CHAPTERS.length;
+
+		var svg = d3.select("#chart")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom);
+
+		var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var chapterColor = d3.scaleOrdinal()
+			.domain([1, 2, 3, 4, 5, 6, 7])
+			.range(["#e07a7a", "#8fbf6a", "#7a8fe0", "#e0c26a", "#c07ae0", "#6ac2c2", "#e0a06a"]);
+
+		var maxSqrtWords = d3.max(CHAPTERS, function (c) {
+			return d3.max(c.units, function (u) { return Math.sqrt(u.words); });
+		});
+
+		var maxSpike = rowHeight * 0.62;
+		var tooltip = d3.select("#tooltip");
+
+		CHAPTERS.forEach(function (c, rowIndex) {
+			var baselineY = rowIndex * rowHeight + rowHeight * 0.72;
+			var color = chapterColor(c.chapter);
+
+			var x = d3.scalePoint()
+				.domain(d3.range(c.units.length))
+				.range([10, width - 10])
+				.padding(0.5);
+
+			var step = c.units.length > 1 ? x(1) - x(0) : width;
+			var half = Math.min(step / 3, 10);
+
+			var d = "M" + (x(0) - half) + "," + baselineY;
+			c.units.forEach(function (u, i) {
+				var spikeY = baselineY - (Math.sqrt(u.words) / maxSqrtWords) * maxSpike;
+				d += " L" + (x(i) - half) + "," + baselineY;
+				d += " L" + x(i) + "," + spikeY;
+				d += " L" + (x(i) + half) + "," + baselineY;
+			});
+
+			g.append("path")
+				.attr("class", "pulse-line")
+				.attr("stroke", color)
+				.attr("d", d);
+
+			g.append("line")
+				.attr("x1", 0).attr("x2", width)
+				.attr("y1", baselineY).attr("y2", baselineY)
+				.attr("stroke", color).attr("stroke-opacity", 0.15);
+
+			g.append("text")
+				.attr("class", "row-label")
+				.attr("x", -10)
+				.attr("y", baselineY + 4)
+				.attr("text-anchor", "end")
+				.attr("fill", color)
+				.text("Ch " + c.chapter);
+
+			g.selectAll("circle.hit-target-" + c.chapter)
+				.data(c.units)
+				.join("circle")
+				.attr("class", "hit-target")
+				.attr("cx", function (u, i) { return x(i); })
+				.attr("cy", function (u) { return baselineY - (Math.sqrt(u.words) / maxSqrtWords) * maxSpike; })
+				.attr("r", Math.max(4, Math.min(half, 9)))
+				.on("mousemove", function (event, u) {
+					tooltip
+						.style("display", "block")
+						.style("left", (event.offsetX + 20) + "px")
+						.style("top", (event.offsetY) + "px")
+						.html("<b>" + u.name + "</b> (chapter " + c.chapter + ", " + u.words + " words)<br />" + (u.text || ""));
+				})
+				.on("mouseleave", function () { tooltip.style("display", "none"); });
+		});
+
+	</script>
+
+</body>
+</html>

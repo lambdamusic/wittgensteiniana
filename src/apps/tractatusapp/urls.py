@@ -8,6 +8,10 @@ from . import views_typewriter
 from . import views_spacetree
 from . import views_d3tree
 from . import views_depthtree
+from . import views_silence
+from . import views_heartbeat
+from . import views_conceptweb
+from . import views_ladder
 
 app_name = 'tractatusapp'
 urlpatterns = [
@@ -43,6 +47,30 @@ urlpatterns = [
    # DEPTH-RHYTHM TIMELINE
    # =========
    url(r'^depthtree$', views_depthtree.index, name='depthtree'),
+
+
+
+   # SILENCE SPIRAL
+   # =========
+   url(r'^silence$', views_silence.index, name='silence'),
+
+
+
+   # HEARTBEAT STRIP
+   # =========
+   url(r'^heartbeat$', views_heartbeat.index, name='heartbeat'),
+
+
+
+   # CONCEPT WEB
+   # =========
+   url(r'^conceptweb$', views_conceptweb.index, name='conceptweb'),
+
+
+
+   # THE LADDER
+   # =========
+   url(r'^ladder$', views_ladder.index, name='ladder'),
 
 
 
