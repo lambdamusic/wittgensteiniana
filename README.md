@@ -32,3 +32,10 @@ Finalized the **Depth-Rhythm** (`/depthtree`) and **Silence Spiral** (`/silence`
 * Click any point/dot to open a reading panel with the full text in all three translations, plus **Previous/Next** buttons and **left/right arrow key** navigation to step through propositions in reading order.
 * Fixed a text-cleaning bug where propositions stored as multiple adjacent HTML fragments were losing the space between sentences.
 * Silence Spiral: reworked into a two-pane layout (spiral on the left, reading panel on the right); dot size is now driven by each proposition's word count instead of its position on the spiral; dismissing the proposition-7 finale now selects it in the reading panel.
+
+Finalized the **Heartbeat Strip** (`/heartbeat`) visualization:
+
+* Added the same reading panel as Depth-Rhythm below the chart: click any pulse to read that proposition in full, in all three translations.
+* Added **Previous/Next** buttons and **left/right arrow key** navigation, stepping through the flattened reading order across all 7 chapter strips.
+* Replaced the black background with a warm paper theme (`#f7f5f0`, deep green accent) and swapped the pastel chapter palette for Depth-Rhythm's darker one so the pulses stay legible on the lighter ground.
+* Updated the footer credit line to match the other two visualizations.
