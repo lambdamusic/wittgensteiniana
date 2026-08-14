@@ -150,24 +150,6 @@
 			color: #bbb;
 		}
 
-		#finale {
-			position: fixed;
-			top: 0; left: 0; right: 0; bottom: 0;
-			background: rgba(0, 0, 0, 0.88);
-			color: #eee;
-			display: none;
-			align-items: center;
-			justify-content: center;
-			text-align: center;
-			cursor: pointer;
-			font-size: 22px;
-			line-height: 1.6;
-			padding: 40px;
-			box-sizing: border-box;
-		}
-		#finale .prop-number { color: #d88; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 20px; }
-		#finale .hint { position: absolute; bottom: 30px; font-size: 11px; color: #777; }
-
 		#subfooter {
 			margin: 0 20px 20px 20px;
 			font-size: 11px;
@@ -210,14 +192,6 @@
 			<div id="reading-panel-placeholder">Click any point on the spiral to read that proposition in full, in every available translation. Use the &larr; &rarr; arrow keys to move between propositions.</div>
 			<div id="reading-panel-translations"></div>
 		</div>
-	</div>
-
-	<div id="finale">
-		<div>
-			<span class="prop-number"></span>
-			<div class="finale-text"></div>
-		</div>
-		<div class="hint">click anywhere to keep exploring</div>
 	</div>
 
 	<div id="subfooter">
@@ -422,23 +396,6 @@
 			});
 
 		svg.call(zoom);
-
-		// finale: the spiral converges on the last point - proposition 7 itself
-		var finale = d3.select("#finale");
-		var last = DATA[DATA.length - 1];
-
-		finale.on("click", function () {
-			finale.style("display", "none");
-			selectPoint(last);
-		});
-
-		function showFinale() {
-			finale.select(".prop-number").text("Proposition " + last.name);
-			finale.select(".finale-text").text(last.text);
-			finale.style("display", "flex");
-		}
-
-		setTimeout(showFinale, 2200);
 
 	</script>
 

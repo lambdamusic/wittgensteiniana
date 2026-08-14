@@ -13,28 +13,43 @@
 
 	<style type="text/css">
 
-		html, body { margin: 0; padding: 0; background: #101014; color: #ddd; font-family: georgia, serif; }
+		html { background: #1b2230; }
+
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: georgia, serif;
+			background-image:
+				radial-gradient(rgba(255, 255, 255, 0.45) 0.8px, transparent 1.2px),
+				linear-gradient(180deg, #1b2230 0%, #2c3a4a 32%, #6f8494 60%, #c6d3d9 84%, #eef3f4 100%);
+			background-size: 26px 26px, 100% 100%;
+		}
 
 		#header { padding: 25px 20px 15px 20px; font-family: arial, sans-serif; }
-		#header h1 { margin: 0 0 5px 0; font-size: 22px; color: #cfcfcf; }
+		#header h1 { margin: 0 0 5px 0; font-size: 22px; color: #dce6ec; }
 		#header .homelink { font-size: 11px; color: #8ab4d8; }
-		#description { padding: 0 20px 20px 20px; font-size: 13px; color: #aaa; line-height: 1.6; font-family: arial, sans-serif; }
+		#description { padding: 0 20px 20px 20px; font-size: 13px; color: #aab6bd; line-height: 1.6; font-family: arial, sans-serif; }
 
 		#ladder { max-width: 720px; margin: 0 auto; padding: 10px 20px 200px 20px; }
 
 		.rung {
 			border-left: 3px solid #555;
 			padding: 10px 16px;
-			margin-bottom: 3px;
+			margin-bottom: 8px;
+			border-radius: 0 4px 4px 0;
+			background: rgba(8, 12, 16, 0.68);
+			cursor: pointer;
 			transition: opacity 0.7s ease, filter 0.7s ease, background 0.4s ease;
 			opacity: 1;
 			filter: grayscale(0);
 		}
-		.rung .rung-number { font-family: arial, sans-serif; font-size: 11px; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 4px; opacity: 0.85; }
-		.rung .rung-text { font-size: 16px; line-height: 1.5; }
+		.rung .rung-number { font-family: arial, sans-serif; font-size: 11px; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 4px; opacity: 0.85; color: #cfe0ea; }
+		.rung .rung-text { font-size: 16px; line-height: 1.5; color: #eef3f4; }
+
+		.rung:hover { background: rgba(8, 12, 16, 0.8); }
 
 		.rung.dissolved { opacity: 0.06; filter: grayscale(1); }
-		.rung.current { background: rgba(255, 255, 255, 0.06); }
+		.rung.current { background: rgba(8, 12, 16, 0.84); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); }
 
 		#finale {
 			max-width: 720px;
@@ -43,17 +58,114 @@
 			text-align: center;
 			font-size: 26px;
 			line-height: 1.7;
-			color: #eee;
+			color: #1c2a30;
 		}
-		#finale .finale-label { display: block; font-family: arial, sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #d88; margin-bottom: 20px; }
+		#finale .finale-label { display: block; font-family: arial, sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #2f6478; margin-bottom: 20px; }
 
 		#progress {
 			position: fixed;
 			top: 0; left: 0;
 			height: 2px;
-			background: #d88;
+			background: #e0723a;
+			box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 			width: 0%;
 			z-index: 10;
+		}
+
+		#modal-backdrop {
+			position: fixed;
+			inset: 0;
+			background: rgba(8, 10, 14, 0.82);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 40px 20px;
+			box-sizing: border-box;
+			z-index: 20;
+		}
+
+		#modal {
+			background: #14181c;
+			color: #eaeef0;
+			max-width: 640px;
+			width: 100%;
+			max-height: 85vh;
+			overflow-y: auto;
+			border-radius: 8px;
+			padding: 28px 32px;
+			box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+			box-sizing: border-box;
+		}
+
+		#modal-header {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 18px;
+		}
+
+		#modal-label {
+			font-family: arial, sans-serif;
+			font-size: 12px;
+			font-weight: bold;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+			color: #e0723a;
+		}
+
+		#modal-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+		#modal-controls button {
+			font-family: arial, sans-serif;
+			font-size: 12px;
+			background: transparent;
+			color: #cfe0ea;
+			border: 1px solid #445;
+			border-radius: 3px;
+			padding: 3px 10px;
+			cursor: pointer;
+		}
+		#modal-controls button:hover:not(:disabled) { background: #cfe0ea; color: #14181c; }
+		#modal-controls button:disabled { opacity: 0.3; cursor: default; }
+
+		#modal-close {
+			font-family: arial, sans-serif;
+			font-size: 16px;
+			line-height: 1;
+			background: transparent;
+			color: #99a3a8;
+			border: none;
+			cursor: pointer;
+			padding: 4px 6px;
+		}
+		#modal-close:hover { color: #eaeef0; }
+
+		.translation-block { padding-top: 18px; }
+		.translation-block:first-child { padding-top: 0; }
+		.translation-block + .translation-block { border-top: 1px solid #262c30; }
+
+		.translation-block-label {
+			font-family: arial, sans-serif;
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: #7f8b90;
+			margin-bottom: 6px;
+		}
+
+		.translation-block-text { font-size: 20px; line-height: 1.6; color: #eaeef0; }
+
+		.translation-block[data-key="german"] .translation-block-text { font-style: italic; color: #cdd6d9; }
+
+		#modal-hint {
+			margin-top: 20px;
+			padding-top: 14px;
+			border-top: 1px solid #262c30;
+			font-family: arial, sans-serif;
+			font-size: 11px;
+			color: #7f8b90;
 		}
 
 	</style>
@@ -76,10 +188,26 @@
 
 	<div id="finale"></div>
 
+	<div id="modal-backdrop">
+		<div id="modal">
+			<div id="modal-header">
+				<div id="modal-label"></div>
+				<div id="modal-controls">
+					<button id="modal-prev" type="button" title="Previous rung (&uarr;)">&uarr; Prev</button>
+					<button id="modal-next" type="button" title="Next rung (&darr;)">&darr; Next</button>
+					<button id="modal-close" type="button" title="Close (Esc)">&times;</button>
+				</div>
+			</div>
+			<div id="modal-translations"></div>
+			<div id="modal-hint">Use &uarr; &darr; to move between rungs, Esc to close.</div>
+		</div>
+	</div>
+
 
 	<script type="text/javascript">
 
 		var DATA = {{ json|safe }};
+		DATA.forEach(function (d, i) { d._i = i; });
 
 		var chapterColor = d3.scaleOrdinal()
 			.domain([1, 2, 3, 4, 5, 6, 7])
@@ -92,7 +220,8 @@
 			.attr("class", "rung")
 			.attr("id", function (d) { return "rung-" + d.id; })
 			.style("margin-left", function (d) { return (d.depth * 26) + "px"; })
-			.style("border-left-color", function (d) { return chapterColor(d.chapter); });
+			.style("border-left-color", function (d) { return chapterColor(d.chapter); })
+			.on("click", function (event, d) { openModal(d._i); });
 
 		rungs.append("span")
 			.attr("class", "rung-number")
@@ -141,6 +270,104 @@
 			var scrollable = document.documentElement.scrollHeight - window.innerHeight;
 			var pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
 			document.getElementById("progress").style.width = pct + "%";
+		});
+
+		// ---- modal: click a rung to read it in full, in every translation ----
+
+		var modalBackdrop = document.getElementById("modal-backdrop");
+		var modalLabel = document.getElementById("modal-label");
+		var modalTranslations = document.getElementById("modal-translations");
+		var modalPrev = document.getElementById("modal-prev");
+		var modalNext = document.getElementById("modal-next");
+		var modalClose = document.getElementById("modal-close");
+
+		var modalIndex = null;
+
+		function openModal(i) {
+			modalIndex = i;
+			var d = DATA[i];
+
+			modalLabel.textContent = d.name + " (chapter " + d.chapter + ", depth " + d.depth + ")";
+			modalPrev.disabled = (i === 0);
+			modalNext.disabled = (i === DATA.length - 1);
+			modalTranslations.innerHTML = "";
+
+			var translations = d.translations && d.translations.length ? d.translations : [];
+			if (!translations.length) {
+				var empty = document.createElement("div");
+				empty.className = "translation-block-text";
+				empty.textContent = "(no text available)";
+				modalTranslations.appendChild(empty);
+			}
+			translations.forEach(function (t) {
+				var block = document.createElement("div");
+				block.className = "translation-block";
+				block.setAttribute("data-key", t.key);
+
+				var label = document.createElement("div");
+				label.className = "translation-block-label";
+				label.textContent = t.label;
+
+				var text = document.createElement("div");
+				text.className = "translation-block-text";
+				text.textContent = t.text;
+
+				block.appendChild(label);
+				block.appendChild(text);
+				modalTranslations.appendChild(block);
+			});
+
+			modalBackdrop.style.display = "flex";
+		}
+
+		function closeModal() {
+			modalBackdrop.style.display = "none";
+		}
+
+		function modalRelative(delta) {
+			if (modalIndex === null) return;
+			var i = Math.max(0, Math.min(DATA.length - 1, modalIndex + delta));
+			if (i === modalIndex) return;
+			openModal(i);
+			scrollRungIntoView(i);
+		}
+
+		modalPrev.addEventListener("click", function () { modalRelative(-1); });
+		modalNext.addEventListener("click", function () { modalRelative(1); });
+		modalClose.addEventListener("click", closeModal);
+		modalBackdrop.addEventListener("click", function (event) {
+			if (event.target === modalBackdrop) closeModal();
+		});
+
+		// ---- up/down arrow keys: move along the ladder, or page through the modal ----
+
+		function scrollRungIntoView(i) {
+			var el = document.getElementById("rung-" + DATA[i].id);
+			if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+		}
+
+		function currentRungIndex() {
+			var el = document.querySelector(".rung.current");
+			return el ? d3.select(el).datum()._i : 0;
+		}
+
+		document.addEventListener("keydown", function (event) {
+			if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+			event.preventDefault();
+
+			var delta = event.key === "ArrowUp" ? -1 : 1;
+
+			if (modalBackdrop.style.display === "flex") {
+				modalRelative(delta);
+				return;
+			}
+
+			var i = Math.max(0, Math.min(DATA.length - 1, currentRungIndex() + delta));
+			scrollRungIntoView(i);
+		});
+
+		document.addEventListener("keydown", function (event) {
+			if (event.key === "Escape" && modalBackdrop.style.display === "flex") closeModal();
 		});
 
 	</script>
