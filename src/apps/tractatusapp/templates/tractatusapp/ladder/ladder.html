@@ -39,7 +39,7 @@
 			border-radius: 0 4px 4px 0;
 			background: rgba(8, 12, 16, 0.68);
 			cursor: pointer;
-			transition: opacity 0.7s ease, filter 0.7s ease, background 0.4s ease;
+			transition: background 0.4s ease;
 			opacity: 1;
 			filter: grayscale(0);
 		}
@@ -48,7 +48,6 @@
 
 		.rung:hover { background: rgba(8, 12, 16, 0.8); }
 
-		.rung.dissolved { opacity: 0.06; filter: grayscale(1); }
 		.rung.current { background: rgba(8, 12, 16, 0.84); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); }
 
 		#finale {
@@ -239,16 +238,45 @@
 			'<span class="finale-label">Proposition ' + last.name + '</span>' + last.text
 		);
 
-		// dissolve rungs once scrolled past; restore them if scrolled back up
-		var dissolveObserver = new IntersectionObserver(function (entries) {
+		// dissolve rungs continuously as they approach and cross the top of the
+		// viewport, so the fade is visible on screen rather than happening
+		// entirely above the fold
+		var FADE_START = 300;  // px from viewport top where the dissolve begins (still fully visible)
+		var FADE_END = -60;    // px from viewport top where the dissolve completes (just past the fold)
+		var MIN_OPACITY = 0.06;
+
+		var activeFade = new Set();
+
+		function updateFade(el) {
+			var top = el.getBoundingClientRect().top;
+			var pct = (FADE_START - top) / (FADE_START - FADE_END);
+			pct = Math.max(0, Math.min(1, pct));
+			el.style.opacity = String(1 - pct * (1 - MIN_OPACITY));
+			el.style.filter = "grayscale(" + Math.round(pct * 100) + "%)";
+		}
+
+		var fadeObserver = new IntersectionObserver(function (entries) {
 			entries.forEach(function (entry) {
 				if (entry.isIntersecting) {
-					entry.target.classList.remove("dissolved");
-				} else if (entry.boundingClientRect.top < 0) {
-					entry.target.classList.add("dissolved");
+					activeFade.add(entry.target);
+				} else {
+					activeFade.delete(entry.target);
 				}
+				updateFade(entry.target);
 			});
-		}, { threshold: 0, rootMargin: "0px 0px -8% 0px" });
+		}, {
+			threshold: 0,
+			rootMargin: (-FADE_END) + "px 0px " + (-(window.innerHeight - FADE_START)) + "px 0px",
+		});
+
+		var fadeRAF = null;
+		window.addEventListener("scroll", function () {
+			if (fadeRAF) return;
+			fadeRAF = requestAnimationFrame(function () {
+				activeFade.forEach(updateFade);
+				fadeRAF = null;
+			});
+		}, { passive: true });
 
 		// highlight whichever rung is nearest the vertical center of the viewport
 		var currentObserver = new IntersectionObserver(function (entries) {
@@ -261,7 +289,7 @@
 		}, { threshold: 0, rootMargin: "-45% 0px -45% 0px" });
 
 		document.querySelectorAll(".rung").forEach(function (el) {
-			dissolveObserver.observe(el);
+			fadeObserver.observe(el);
 			currentObserver.observe(el);
 		});
 
