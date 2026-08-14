@@ -31,6 +31,7 @@
 
 		.focus-line { stroke: #333; stroke-width: 1px; stroke-dasharray: 3,3; }
 		.focus-circle { fill: #750b0b; stroke: #fff; stroke-width: 1.5px; }
+		.selected-circle { fill: none; stroke: #750b0b; stroke-width: 2px; }
 
 		#tooltip {
 			position: absolute;
@@ -47,9 +48,99 @@
 		#tooltip b { color: #ffb3b3; }
 
 		#subfooter {
-			margin: 20px 20px 40px 20px;
+			margin: 20px 20px 10px 20px;
 			font-size: 11px;
 			color: #666;
+		}
+
+		#reading-panel {
+			margin: 15px 20px 40px 20px;
+			padding: 22px 28px;
+			background: #fff;
+			border-left: 4px solid #750b0b;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+			cursor: default;
+		}
+
+		#reading-panel-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 10px;
+		}
+
+		#reading-panel-label {
+			font-family: arial, sans-serif;
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+			color: #750b0b;
+		}
+
+		#reading-panel-nav {
+			display: none;
+			gap: 8px;
+		}
+
+		#reading-panel-nav button {
+			font-family: arial, sans-serif;
+			font-size: 12px;
+			background: #fff;
+			color: #750b0b;
+			border: 1px solid #750b0b;
+			border-radius: 3px;
+			padding: 3px 10px;
+			cursor: pointer;
+		}
+
+		#reading-panel-nav button:hover:not(:disabled) {
+			background: #750b0b;
+			color: #fff;
+		}
+
+		#reading-panel-nav button:disabled {
+			opacity: 0.3;
+			cursor: default;
+		}
+
+		#reading-panel-placeholder {
+			font-family: arial, sans-serif;
+			font-size: 14px;
+			color: #999;
+			font-style: italic;
+		}
+
+		.translation-block {
+			padding-top: 18px;
+		}
+		.translation-block:first-child {
+			padding-top: 0;
+		}
+		.translation-block + .translation-block {
+			border-top: 1px solid #eee;
+		}
+
+		.translation-block-label {
+			font-family: arial, sans-serif;
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: #999;
+			margin-bottom: 6px;
+		}
+
+		.translation-block-text {
+			font-family: georgia, serif;
+			font-size: 20px;
+			line-height: 1.6;
+			color: #222;
+		}
+
+		.translation-block[data-key="german"] .translation-block-text {
+			font-style: italic;
+			color: #444;
 		}
 
 	</style>
@@ -72,7 +163,19 @@
 	</div>
 
 	<div id="subfooter">
-		Ludwig Wittgenstein, Tractatus Logico-Philosophicus, 1921. Translated from the German by C.K. Ogden, 1922.
+		Ludwig Wittgenstein, Tractatus Logico-Philosophicus, 1921.
+	</div>
+
+	<div id="reading-panel">
+		<div id="reading-panel-header">
+			<div id="reading-panel-label">Selected proposition</div>
+			<div id="reading-panel-nav">
+				<button id="reading-prev" type="button" title="Previous (&larr;)">&larr; Previous</button>
+				<button id="reading-next" type="button" title="Next (&rarr;)">Next &rarr;</button>
+			</div>
+		</div>
+		<div id="reading-panel-placeholder">Click any point on the chart above to read that proposition in full, in every available translation. Use the &larr; &rarr; arrow keys to move between propositions.</div>
+		<div id="reading-panel-translations"></div>
 	</div>
 
 
@@ -178,6 +281,89 @@
 
 		var tooltip = d3.select("#tooltip");
 
+		var selectedCircle = g.append("circle")
+			.attr("class", "selected-circle")
+			.attr("r", 6)
+			.style("display", "none");
+
+		var readingLabel = document.getElementById("reading-panel-label");
+		var readingPlaceholder = document.getElementById("reading-panel-placeholder");
+		var readingTranslations = document.getElementById("reading-panel-translations");
+		var readingNav = document.getElementById("reading-panel-nav");
+		var prevBtn = document.getElementById("reading-prev");
+		var nextBtn = document.getElementById("reading-next");
+
+		var selectedIndex = null;
+
+		function positionSelectedCircle() {
+			if (selectedIndex === null) return;
+			var d = DATA[selectedIndex];
+			selectedCircle
+				.attr("cx", activeX(selectedIndex))
+				.attr("cy", y(d.depth))
+				.style("display", null);
+		}
+
+		function selectPoint(i) {
+			selectedIndex = i;
+			positionSelectedCircle();
+
+			var d = DATA[i];
+			readingLabel.textContent = d.name + " (chapter " + d.chapter + ", depth " + d.depth + ")";
+
+			readingPlaceholder.style.display = "none";
+			readingNav.style.display = "flex";
+			prevBtn.disabled = (i === 0);
+			nextBtn.disabled = (i === DATA.length - 1);
+			readingTranslations.innerHTML = "";
+
+			var translations = d.translations && d.translations.length ? d.translations : [];
+			if (!translations.length) {
+				var empty = document.createElement("div");
+				empty.className = "translation-block-text";
+				empty.textContent = "(no text available)";
+				readingTranslations.appendChild(empty);
+			}
+			translations.forEach(function (t) {
+				var block = document.createElement("div");
+				block.className = "translation-block";
+				block.setAttribute("data-key", t.key);
+
+				var label = document.createElement("div");
+				label.className = "translation-block-label";
+				label.textContent = t.label;
+
+				var text = document.createElement("div");
+				text.className = "translation-block-text";
+				text.textContent = t.text;
+
+				block.appendChild(label);
+				block.appendChild(text);
+				readingTranslations.appendChild(block);
+			});
+		}
+
+		function selectRelative(delta) {
+			if (selectedIndex === null) return;
+			var i = Math.max(0, Math.min(DATA.length - 1, selectedIndex + delta));
+			if (i === selectedIndex) return;
+			selectPoint(i);
+		}
+
+		prevBtn.addEventListener("click", function () { selectRelative(-1); });
+		nextBtn.addEventListener("click", function () { selectRelative(1); });
+
+		document.addEventListener("keydown", function (event) {
+			if (selectedIndex === null) return;
+			if (event.key === "ArrowLeft") {
+				selectRelative(-1);
+				event.preventDefault();
+			} else if (event.key === "ArrowRight") {
+				selectRelative(1);
+				event.preventDefault();
+			}
+		});
+
 		function chapterStartIndices() {
 			return chapterSpans.map(function (s) { return s.start; });
 		}
@@ -209,13 +395,18 @@
 			.attr("width", width)
 			.attr("height", height)
 			.style("fill", "none")
+			.style("cursor", "pointer")
 			.style("pointer-events", "all");
 
 		var activeX = x;
 
-		function showFocus(mx) {
+		function nearestIndex(mx) {
 			var i0 = Math.round(activeX.invert(mx));
-			var i = Math.max(0, Math.min(DATA.length - 1, i0));
+			return Math.max(0, Math.min(DATA.length - 1, i0));
+		}
+
+		function showFocus(mx) {
+			var i = nearestIndex(mx);
 			var d = DATA[i];
 			var cx = activeX(i), cy = y(d.depth);
 
@@ -239,7 +430,10 @@
 			.on("mousemove", function (event) {
 				showFocus(d3.pointer(event, g.node())[0]);
 			})
-			.on("mouseleave", hideFocus);
+			.on("mouseleave", hideFocus)
+			.on("click", function (event) {
+				selectPoint(nearestIndex(d3.pointer(event, g.node())[0]));
+			});
 
 		var zoom = d3.zoom()
 			.scaleExtent([1, 25])
@@ -249,6 +443,7 @@
 				activeX = event.transform.rescaleX(x);
 				render(activeX);
 				hideFocus();
+				positionSelectedCircle();
 			});
 
 		svg.call(zoom);

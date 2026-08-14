@@ -5,11 +5,12 @@ and resurfacing from sub-clauses.
 """
 
 from django.shortcuts import render
-from django.utils.html import strip_tags
 from django.utils.text import Truncator
 import json
 
-from tractatusapp.tractatus_reading_order import ordered_units, ogden_text_map
+from tractatusapp.tractatus_reading_order import (
+	ordered_units, all_translations_map, TRANSLATIONS, clean_translation_html,
+)
 
 
 def index(request):
@@ -19,17 +20,24 @@ def index(request):
 	"""
 
 	units = ordered_units()
-	unit_text = ogden_text_map(units)
+	unit_translations = all_translations_map(units)
 
 	nodes = []
 	for unit in units:
-		text = unit_text.get(unit.id, "")
+		raw_translations = unit_translations.get(unit.id, {})
+		translations = [
+			{'key': key, 'label': label, 'text': clean_translation_html(raw_translations[key])}
+			for key, label in TRANSLATIONS
+			if raw_translations.get(key)
+		]
+		ogden_text = next((t['text'] for t in translations if t['key'] == 'ogden'), '')
 		nodes.append({
 			'id': unit.id,
 			'name': unit.name,
 			'depth': unit.level,
 			'chapter': int(unit.name.split('.')[0]),
-			'text': Truncator(strip_tags(text)).chars(280),
+			'text': Truncator(ogden_text).chars(280),
+			'translations': translations,
 		})
 
 	context = {
@@ -38,7 +46,7 @@ def index(request):
 			The Depth-Rhythm Tractatus plots every proposition in reading order, left to right, <br />
 			with height showing how deeply nested each one is (a sub-comment on a sub-comment on a sub-comment...).
 			<br /><br />
-			<b>Hover</b> over a point to read that proposition. <b>Scroll</b> to zoom into a chapter.
+			<b>Hover</b> over a point for a preview. <b>Click</b> to read it in full, in every available translation (English: Ogden 1922, Pears &amp; McGuinness 1961; and the German original). <b>Scroll</b> to zoom into a chapter.
 			""",
 	}
 

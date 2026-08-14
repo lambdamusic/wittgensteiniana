@@ -8,6 +8,8 @@ Experimental visualizations of Wittgenstein's Tractatus.
 
 This is a Django app which is mirrored in local using `wget` and rendered as a static site in /docs.
 
+Requires **Python 3.9** (Django is pinned `<4.0.0` in `requirements.txt`). See `requirements.txt`.
+
 The `docs` folder contains a static version of the site, which is accessible at: 
 
 * http://wittgensteiniana.michelepasin.org/
@@ -18,3 +20,15 @@ The `docs` folder contains a static version of the site, which is accessible at:
 This project is not actively developed anymore, but every once in a while new visualizations may be added.
 
 Background info: https://www.michelepasin.org/projects/wittgensteiniana/index.html
+
+
+## Changelog
+
+### 2026-08-14
+
+Finalized the **Depth-Rhythm** (`/depthtree`) and **Silence Spiral** (`/silence`) visualizations:
+
+* Both now show every proposition in all three available translations - Ogden (1922), Pears & McGuinness (1961), and the German original - instead of just Ogden.
+* Click any point/dot to open a reading panel with the full text in all three translations, plus **Previous/Next** buttons and **left/right arrow key** navigation to step through propositions in reading order.
+* Fixed a text-cleaning bug where propositions stored as multiple adjacent HTML fragments were losing the space between sentences.
+* Silence Spiral: reworked into a two-pane layout (spiral on the left, reading panel on the right); dot size is now driven by each proposition's word count instead of its position on the spiral; dismissing the proposition-7 finale now selects it in the reading panel.
