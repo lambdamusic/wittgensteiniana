@@ -4,3 +4,4 @@ django-extensions
 Werkzeug
 click
 requests
+rdflib

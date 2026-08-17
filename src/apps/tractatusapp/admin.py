@@ -122,6 +122,7 @@ class AuthListStandardAdmin(admin.ModelAdmin):
 admin.site.register(TextUnit, TextUnit.Admin)
 admin.site.register(TextFragment, TextFragment.Admin)
 admin.site.register(TextExpression, TextExpression.Admin)
+admin.site.register(Topic, Topic.Admin)
 
 
 admin.site.register(TextUnitType, AuthListStandardAdmin)

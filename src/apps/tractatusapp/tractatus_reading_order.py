@@ -20,19 +20,36 @@ def clean_translation_html(html):
 	return strip_tags(re.sub(r'>\s*<', '> <', html or '')).strip()
 
 
+def _name_sort_key(name):
+	"""
+	Sort key reproducing Wittgenstein's own decimal-fraction numbering, e.g.
+	"6.5" < "6.51" < "6.511" < "6.52" < "6.53". The digits after the "." must
+	compare as a string/decimal-fraction, not as an integer - as an int, 511 >
+	52, but proposition "6.511" (a comment on 6.51) must still sort before the
+	unrelated sibling "6.52".
+	"""
+	chapter, _, frac = name.partition('.')
+	return (int(chapter), frac)
+
+
 def ordered_units():
 	"""
 	Returns all TextUnits in true reading order across the whole book.
 
 	Each top-level proposition (1..7) is its own mptt tree, so tree_id order
 	isn't guaranteed to match book order - we sort the roots by their numeric
-	name first, then walk each tree's own descendants (already DFS pre-order).
+	name first. mptt's own get_descendants() order is a valid depth-first
+	walk of the tree structure, but doesn't guarantee siblings come out in
+	numeric order (it reflects original insertion order, not proposition
+	number) - so each tree's descendants are re-sorted by name afterwards.
 	"""
 	top_units = sorted(TextUnit.tree_top(), key=lambda u: int(u.name))
 
 	units = []
 	for top in top_units:
-		units += list(top.get_descendants(include_self=True))
+		descendants = list(top.get_descendants(include_self=True))
+		descendants.sort(key=lambda u: _name_sort_key(u.name))
+		units += descendants
 	return units
 
 

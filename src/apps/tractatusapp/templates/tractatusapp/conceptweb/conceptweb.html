@@ -13,24 +13,91 @@
 
 	<style type="text/css">
 
-		html, body { margin: 0; padding: 0; background: #14141a; color: #ddd; font-family: arial, sans-serif; }
+		html, body { margin: 0; padding: 0; background: #14141a; color: #ddd; font-family: arial, sans-serif; box-sizing: border-box; height: 100%; }
+		body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-		#header { padding: 15px 20px 5px 20px; }
+		#header { padding: 15px 20px 5px 20px; flex-shrink: 0; }
 		#header h1 { margin: 0 0 5px 0; font-size: 22px; color: #cfcfcf; }
 		#header .homelink { font-size: 11px; color: #8ab4d8; }
-		#description { padding: 0 20px 10px 20px; font-size: 13px; color: #aaa; line-height: 1.5; }
+		#description { padding: 0 20px 10px 20px; font-size: 13px; color: #aaa; line-height: 1.5; flex-shrink: 0; }
 
-		#chart-container { position: relative; padding: 0 20px; }
+		#main-row {
+			display: flex;
+			flex: 1 1 auto;
+			min-height: 0;
+			padding: 0 20px 20px 20px;
+			box-sizing: border-box;
+			gap: 12px;
+		}
+
+		#sidebar-concepts, #sidebar-propositions {
+			flex: 0 0 230px;
+			min-height: 0;
+			overflow-y: auto;
+			background: rgba(255, 255, 255, 0.03);
+			border: 1px solid #2a2a33;
+			border-radius: 4px;
+		}
+
+		#chart-container {
+			flex: 1 1 auto;
+			position: relative;
+			min-width: 0;
+			min-height: 480px;
+			border: 1px solid #2a2a33;
+			border-radius: 4px;
+		}
+		#chart-container svg { width: 100%; height: 100%; display: block; }
+
+		.sidebar-header {
+			position: sticky;
+			top: 0;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			padding: 10px 12px;
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: #8ab4d8;
+			background: #1b1b22;
+			border-bottom: 1px solid #2a2a33;
+		}
+		.sidebar-header button {
+			font-family: arial, sans-serif;
+			font-size: 10px;
+			background: transparent;
+			color: #8ab4d8;
+			border: 1px solid #445;
+			border-radius: 3px;
+			padding: 2px 7px;
+			cursor: pointer;
+			text-transform: none;
+			letter-spacing: normal;
+		}
+		.sidebar-header button:hover { background: #8ab4d8; color: #14141a; }
+
+		.concept-item, .proposition-item {
+			padding: 8px 12px;
+			font-size: 13px;
+			cursor: pointer;
+			border-bottom: 1px solid #22222a;
+		}
+		.concept-item:hover, .proposition-item:hover { background: rgba(255, 255, 255, 0.06); }
+		.concept-item.active { background: #2c3a4a; color: #f0e6c8; }
+		.proposition-item .prop-number { font-weight: bold; margin-right: 6px; }
 
 		.link { stroke: #666; stroke-opacity: 0.25; }
 		.node-prop { cursor: pointer; stroke: #14141a; stroke-width: 0.5px; }
-		.node-keyword { cursor: pointer; fill: #f0e6c8; stroke: #333; stroke-width: 1px; }
-		.keyword-label { fill: #f0e6c8; font-size: 12px; font-weight: bold; pointer-events: none; }
+		.node-concept { cursor: pointer; fill: #f0e6c8; stroke: #333; stroke-width: 1px; }
+		.concept-label { fill: #f0e6c8; font-size: 9px; font-weight: bold; pointer-events: none; }
 
 		.dimmed { opacity: 0.08; }
 
 		#tooltip {
-			position: absolute;
+			position: fixed;
 			pointer-events: none;
 			background: rgba(20, 20, 25, 0.95);
 			color: #eee;
@@ -41,13 +108,114 @@
 			max-width: 320px;
 			display: none;
 			border: 1px solid #444;
+			z-index: 5;
 		}
 		#tooltip b { color: #f0e6c8; }
 
 		#subfooter {
-			margin: 20px 20px 40px 20px;
+			margin: 0 20px 16px 20px;
 			font-size: 11px;
 			color: #666;
+			flex-shrink: 0;
+		}
+
+		/* reading overlay - reused from /ladder */
+
+		#modal-backdrop {
+			position: fixed;
+			inset: 0;
+			background: rgba(8, 10, 14, 0.82);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 40px 20px;
+			box-sizing: border-box;
+			z-index: 20;
+		}
+
+		#modal {
+			background: #14181c;
+			color: #eaeef0;
+			max-width: 640px;
+			width: 100%;
+			max-height: 85vh;
+			overflow-y: auto;
+			border-radius: 8px;
+			padding: 28px 32px;
+			box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+			box-sizing: border-box;
+		}
+
+		#modal-header {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 18px;
+		}
+
+		#modal-label {
+			font-size: 12px;
+			font-weight: bold;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+			color: #e0723a;
+		}
+
+		#modal-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+		#modal-controls button {
+			font-size: 12px;
+			background: transparent;
+			color: #cfe0ea;
+			border: 1px solid #445;
+			border-radius: 3px;
+			padding: 3px 10px;
+			cursor: pointer;
+		}
+		#modal-controls button:hover:not(:disabled) { background: #cfe0ea; color: #14181c; }
+		#modal-controls button:disabled { opacity: 0.3; cursor: default; }
+
+		#modal-close {
+			font-size: 16px;
+			line-height: 1;
+			background: transparent;
+			color: #99a3a8;
+			border: none;
+			cursor: pointer;
+			padding: 4px 6px;
+		}
+		#modal-close:hover { color: #eaeef0; }
+
+		.translation-block { padding-top: 18px; }
+		.translation-block:first-child { padding-top: 0; }
+		.translation-block + .translation-block { border-top: 1px solid #262c30; }
+
+		.translation-block-label {
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: #7f8b90;
+			margin-bottom: 6px;
+		}
+
+		.translation-block-text { font-size: 18px; line-height: 1.6; color: #eaeef0; }
+
+		.translation-block[data-key="german"] .translation-block-text { font-style: italic; color: #cdd6d9; }
+
+		#modal-hint {
+			margin-top: 20px;
+			padding-top: 14px;
+			border-top: 1px solid #262c30;
+			font-size: 11px;
+			color: #7f8b90;
+		}
+
+		@media (max-width: 900px) {
+			#main-row { flex-direction: column; overflow-y: auto; }
+			#sidebar-concepts, #sidebar-propositions { flex: 0 0 220px; }
+			#chart-container { flex: 0 0 420px; }
 		}
 
 	</style>
@@ -57,43 +225,101 @@
 <body>
 
 	<div id="header">
-		<h1>The Concept Web
+		<h1>Wittgenstein's Tractatus Concept Web
 			<a class="homelink" href="{% url 'tractatusapp:witt_about' %}">home</a>
 		</h1>
 	</div>
 
 	<div id="description">{{ experiment_description|safe }}</div>
 
-	<div id="chart-container">
-		<svg id="chart"></svg>
-		<div id="tooltip"></div>
+	<div id="main-row">
+
+		<div id="sidebar-concepts">
+			<div class="sidebar-header">
+				<span>Concepts</span>
+				<button id="clear-selection" type="button" title="Clear selection">Clear</button>
+			</div>
+			<div id="concept-list"></div>
+		</div>
+
+		<div id="chart-container">
+			<svg id="chart"></svg>
+			<div id="tooltip"></div>
+		</div>
+
+		<div id="sidebar-propositions">
+			<div class="sidebar-header"><span id="proposition-list-label">Propositions</span></div>
+			<div id="proposition-list"></div>
+		</div>
+
 	</div>
 
 	<div id="subfooter">
-		Ludwig Wittgenstein, Tractatus Logico-Philosophicus, 1921. Translated from the German by C.K. Ogden, 1922.
+		Ludwig Wittgenstein, Tractatus Logico-Philosophicus, 1921.
+	</div>
+
+	<div id="modal-backdrop">
+		<div id="modal">
+			<div id="modal-header">
+				<div id="modal-label"></div>
+				<div id="modal-controls">
+					<button id="modal-prev" type="button" title="Previous (&larr;)">&larr; Prev</button>
+					<button id="modal-next" type="button" title="Next (&rarr;)">&rarr; Next</button>
+					<button id="modal-close" type="button" title="Close (Esc)">&times;</button>
+				</div>
+			</div>
+			<div id="modal-translations"></div>
+			<div id="modal-hint">Use &larr; &rarr; to move between propositions, Esc to close.</div>
+		</div>
 	</div>
 
 
 	<script type="text/javascript">
 
 		var GRAPH = {{ json|safe }};
+		var CONCEPTS = GRAPH.concepts;
+		var PROPOSITIONS = GRAPH.propositions;
+		var LINKS = GRAPH.links;
 
-		var width = Math.max(900, window.innerWidth - 60),
-			height = 680;
+		var propositionById = {};
+		PROPOSITIONS.forEach(function (p) { propositionById[p.id] = p; });
+		var conceptById = {};
+		CONCEPTS.forEach(function (c) { conceptById[c.id] = c; });
 
-		var svg = d3.select("#chart")
-			.attr("width", width)
-			.attr("height", height);
+		var conceptPropositions = {};  // concept id -> [proposition ids]
+		LINKS.forEach(function (l) {
+			(conceptPropositions[l.source] = conceptPropositions[l.source] || []).push(l.target);
+		});
 
-		var g = svg.append("g");
-		var tooltip = d3.select("#tooltip");
+		function ogdenPreview(p) {
+			var ogden = (p.translations || []).find(function (t) { return t.key === "ogden"; });
+			var text = ogden ? ogden.text : "";
+			return text.length > 220 ? text.slice(0, 220) + "…" : text;
+		}
 
 		var chapterColor = d3.scaleOrdinal()
 			.domain([1, 2, 3, 4, 5, 6, 7])
 			.range(["#e07a7a", "#8fbf6a", "#7a8fe0", "#e0c26a", "#c07ae0", "#6ac2c2", "#e0a06a"]);
 
-		var nodes = GRAPH.nodes;
-		var links = GRAPH.links;
+		var selectedConcept = null;
+		var DATA = [];       // proposition list currently backing the reading overlay's Prev/Next
+		var modalIndex = null;
+
+		// ---------------------------------------------------------------
+		// graph
+		// ---------------------------------------------------------------
+
+		var chartContainer = document.getElementById("chart-container");
+		var width = chartContainer.clientWidth || 700;
+		var height = Math.max(480, chartContainer.clientHeight || 680);
+
+		var svg = d3.select("#chart").attr("viewBox", [0, 0, width, height]);
+		var g = svg.append("g");
+		var tooltip = d3.select("#tooltip");
+
+		var nodes = CONCEPTS.map(function (c) { return Object.assign({type: "concept"}, c); })
+			.concat(PROPOSITIONS.map(function (p) { return Object.assign({type: "proposition"}, p); }));
+		var links = LINKS.map(function (l) { return Object.assign({}, l); });
 
 		var neighbors = {};
 		nodes.forEach(function (n) { neighbors[n.id] = new Set([n.id]); });
@@ -104,18 +330,15 @@
 
 		var simulation = d3.forceSimulation(nodes)
 			.force("link", d3.forceLink(links).id(function (d) { return d.id; })
-				.distance(function (l) { return l.target.type === "keyword" || l.source.type === "keyword" ? 55 : 30; })
-				.strength(0.35))
-			.force("charge", d3.forceManyBody().strength(-30))
+				.distance(function (l) { return (l.source.type === "concept" || l.target.type === "concept") ? 45 : 25; })
+				.strength(0.3))
+			.force("charge", d3.forceManyBody().strength(-25))
 			.force("center", d3.forceCenter(width / 2, height / 2))
-			.force("collide", d3.forceCollide().radius(function (d) { return d.type === "keyword" ? 30 : 5; }))
-			.force("radial", d3.forceRadial(220, width / 2, height / 2).strength(function (d) { return d.type === "keyword" ? 0.5 : 0; }));
+			.force("collide", d3.forceCollide().radius(function (d) { return d.type === "concept" ? 14 : 4; }))
+			.force("radial", d3.forceRadial(Math.min(width, height) * 0.42, width / 2, height / 2)
+				.strength(function (d) { return d.type === "concept" ? 0.6 : 0; }));
 
-		var link = g.append("g")
-			.selectAll("line")
-			.data(links)
-			.join("line")
-			.attr("class", "link");
+		var link = g.append("g").selectAll("line").data(links).join("line").attr("class", "link");
 
 		var propNode = g.append("g")
 			.selectAll("circle")
@@ -126,47 +349,55 @@
 			.attr("fill", function (d) { return chapterColor(d.chapter); })
 			.call(drag(simulation))
 			.on("mousemove", function (event, d) {
-				tooltip
-					.style("display", "block")
-					.style("left", (event.offsetX + 15) + "px")
-					.style("top", (event.offsetY + 15) + "px")
-					.html("<b>" + d.label + "</b> (chapter " + d.chapter + ")<br />" + (d.text || ""));
+				tooltip.style("display", "block")
+					.style("left", (event.clientX + 15) + "px")
+					.style("top", (event.clientY + 15) + "px")
+					.html("<b>" + d.name + "</b> (chapter " + d.chapter + ")");
 			})
-			.on("mouseenter", function (event, d) { highlight(d); })
-			.on("mouseleave", function () { clearHighlight(); tooltip.style("display", "none"); });
+			.on("mouseenter", function (event, d) { highlight(d.id); })
+			.on("mouseleave", function () { highlight(selectedConcept); tooltip.style("display", "none"); })
+			.on("click", function (event, d) { openReading(d.id); });
 
-		var keywordNode = g.append("g")
+		var conceptNode = g.append("g")
 			.selectAll("circle")
-			.data(nodes.filter(function (d) { return d.type === "keyword"; }))
+			.data(nodes.filter(function (d) { return d.type === "concept"; }))
 			.join("circle")
-			.attr("class", "node-keyword")
-			.attr("r", 16)
+			.attr("class", "node-concept")
+			.attr("r", 10)
 			.call(drag(simulation))
-			.on("mouseenter", function (event, d) { highlight(d); })
-			.on("mouseleave", function () { clearHighlight(); });
+			.on("mousemove", function (event, d) {
+				tooltip.style("display", "block")
+					.style("left", (event.clientX + 15) + "px")
+					.style("top", (event.clientY + 15) + "px")
+					.html("<b>" + d.name + "</b><br />" + (d.description || ""));
+			})
+			.on("mouseenter", function (event, d) { highlight(d.id); })
+			.on("mouseleave", function () { highlight(selectedConcept); tooltip.style("display", "none"); })
+			.on("click", function (event, d) { selectConcept(selectedConcept === d.id ? null : d.id); });
 
-		var keywordLabel = g.append("g")
+		var conceptLabel = g.append("g")
 			.selectAll("text")
-			.data(nodes.filter(function (d) { return d.type === "keyword"; }))
+			.data(nodes.filter(function (d) { return d.type === "concept"; }))
 			.join("text")
-			.attr("class", "keyword-label")
+			.attr("class", "concept-label")
 			.attr("text-anchor", "middle")
-			.attr("dy", 4)
-			.text(function (d) { return d.label; });
+			.attr("dy", -14)
+			.text(function (d) { return d.name; });
 
-		function highlight(d) {
-			var connected = neighbors[d.id];
+		function highlight(id) {
+			if (!id) { clearHighlight(); return; }
+			var connected = neighbors[id];
 			link.classed("dimmed", function (l) { return !(connected.has(l.source.id) && connected.has(l.target.id)); });
 			propNode.classed("dimmed", function (n) { return !connected.has(n.id); });
-			keywordNode.classed("dimmed", function (n) { return !connected.has(n.id); });
-			keywordLabel.classed("dimmed", function (n) { return !connected.has(n.id); });
+			conceptNode.classed("dimmed", function (n) { return !connected.has(n.id); });
+			conceptLabel.classed("dimmed", function (n) { return !connected.has(n.id); });
 		}
 
 		function clearHighlight() {
 			link.classed("dimmed", false);
 			propNode.classed("dimmed", false);
-			keywordNode.classed("dimmed", false);
-			keywordLabel.classed("dimmed", false);
+			conceptNode.classed("dimmed", false);
+			conceptLabel.classed("dimmed", false);
 		}
 
 		simulation.on("tick", function () {
@@ -177,8 +408,8 @@
 				.attr("y2", function (d) { return d.target.y; });
 
 			propNode.attr("cx", function (d) { return d.x; }).attr("cy", function (d) { return d.y; });
-			keywordNode.attr("cx", function (d) { return d.x; }).attr("cy", function (d) { return d.y; });
-			keywordLabel.attr("x", function (d) { return d.x; }).attr("y", function (d) { return d.y; });
+			conceptNode.attr("cx", function (d) { return d.x; }).attr("cy", function (d) { return d.y; });
+			conceptLabel.attr("x", function (d) { return d.x; }).attr("y", function (d) { return d.y; });
 		});
 
 		function drag(sim) {
@@ -186,9 +417,7 @@
 				if (!event.active) sim.alphaTarget(0.2).restart();
 				d.fx = d.x; d.fy = d.y;
 			}
-			function dragged(event, d) {
-				d.fx = event.x; d.fy = event.y;
-			}
+			function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
 			function dragended(event, d) {
 				if (!event.active) sim.alphaTarget(0);
 				d.fx = null; d.fy = null;
@@ -196,11 +425,189 @@
 			return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
 		}
 
-		var zoom = d3.zoom()
-			.scaleExtent([0.4, 6])
-			.on("zoom", function (event) { g.attr("transform", event.transform); });
-
+		var zoom = d3.zoom().scaleExtent([0.4, 6]).on("zoom", function (event) { g.attr("transform", event.transform); });
 		svg.call(zoom);
+
+		// ---------------------------------------------------------------
+		// left sidebar: concepts
+		// ---------------------------------------------------------------
+
+		var conceptListEl = document.getElementById("concept-list");
+		var sortedConcepts = CONCEPTS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+
+		function conceptItemId(id) { return "concept-item-" + id.replace(":", "-"); }
+
+		sortedConcepts.forEach(function (c) {
+			var item = document.createElement("div");
+			item.className = "concept-item";
+			item.id = conceptItemId(c.id);
+			item.textContent = c.name;
+			item.addEventListener("click", function () { selectConcept(selectedConcept === c.id ? null : c.id); });
+			item.addEventListener("mouseenter", function (event) {
+				highlight(c.id);
+				tooltip.style("display", "block")
+					.style("left", (event.clientX + 15) + "px")
+					.style("top", (event.clientY + 15) + "px")
+					.html("<b>" + c.name + "</b><br />" + (c.description || ""));
+			});
+			item.addEventListener("mouseleave", function () { highlight(selectedConcept); tooltip.style("display", "none"); });
+			conceptListEl.appendChild(item);
+		});
+
+		document.getElementById("clear-selection").addEventListener("click", function () { selectConcept(null); });
+
+		// ---------------------------------------------------------------
+		// right sidebar: propositions (full list, or narrowed to the selected concept)
+		// ---------------------------------------------------------------
+
+		var propositionListEl = document.getElementById("proposition-list");
+		var propositionListLabel = document.getElementById("proposition-list-label");
+		var readingOrder = {};
+		PROPOSITIONS.forEach(function (p, i) { readingOrder[p.id] = i; });
+
+		function renderPropositionList() {
+			propositionListEl.innerHTML = "";
+
+			var ids = selectedConcept ? (conceptPropositions[selectedConcept] || []) : PROPOSITIONS.map(function (p) { return p.id; });
+			var items = ids.map(function (id) { return propositionById[id]; }).filter(Boolean);
+			items.sort(function (a, b) { return readingOrder[a.id] - readingOrder[b.id]; });
+
+			propositionListLabel.textContent = selectedConcept
+				? conceptById[selectedConcept].name + " (" + items.length + ")"
+				: "Propositions (" + items.length + ")";
+
+			items.forEach(function (p) {
+				var item = document.createElement("div");
+				item.className = "proposition-item";
+
+				var num = document.createElement("span");
+				num.className = "prop-number";
+				num.style.color = chapterColor(p.chapter);
+				num.textContent = p.name;
+				item.appendChild(num);
+
+				item.addEventListener("click", function () { openReading(p.id); });
+				item.addEventListener("mouseenter", function () { highlight(p.id); });
+				item.addEventListener("mousemove", function (event) {
+					tooltip.style("display", "block")
+						.style("left", (event.clientX + 15) + "px")
+						.style("top", (event.clientY + 15) + "px")
+						.html("<b>" + p.name + "</b> (chapter " + p.chapter + ")<br />" + (ogdenPreview(p) || "(no Ogden text available)"));
+				});
+				item.addEventListener("mouseleave", function () { highlight(selectedConcept); tooltip.style("display", "none"); });
+
+				propositionListEl.appendChild(item);
+			});
+
+			DATA = items;
+		}
+
+		// ---------------------------------------------------------------
+		// selection state
+		// ---------------------------------------------------------------
+
+		function selectConcept(id) {
+			selectedConcept = id;
+
+			document.querySelectorAll(".concept-item.active").forEach(function (el) { el.classList.remove("active"); });
+			if (id) {
+				var el = document.getElementById(conceptItemId(id));
+				if (el) el.classList.add("active");
+			}
+
+			highlight(id);
+			renderPropositionList();
+		}
+
+		// ---------------------------------------------------------------
+		// reading overlay - reused from /ladder, minus the depth label
+		// ---------------------------------------------------------------
+
+		var modalBackdrop = document.getElementById("modal-backdrop");
+		var modalLabel = document.getElementById("modal-label");
+		var modalTranslations = document.getElementById("modal-translations");
+		var modalPrev = document.getElementById("modal-prev");
+		var modalNext = document.getElementById("modal-next");
+		var modalClose = document.getElementById("modal-close");
+
+		function openModal(i) {
+			modalIndex = i;
+			var d = DATA[i];
+
+			modalLabel.textContent = d.name + " (chapter " + d.chapter + ")";
+			modalPrev.disabled = (i === 0);
+			modalNext.disabled = (i === DATA.length - 1);
+			modalTranslations.innerHTML = "";
+
+			var translations = d.translations && d.translations.length ? d.translations : [];
+			if (!translations.length) {
+				var empty = document.createElement("div");
+				empty.className = "translation-block-text";
+				empty.textContent = "(no text available)";
+				modalTranslations.appendChild(empty);
+			}
+			translations.forEach(function (t) {
+				var block = document.createElement("div");
+				block.className = "translation-block";
+				block.setAttribute("data-key", t.key);
+
+				var label = document.createElement("div");
+				label.className = "translation-block-label";
+				label.textContent = t.label;
+
+				var text = document.createElement("div");
+				text.className = "translation-block-text";
+				text.textContent = t.text;
+
+				block.appendChild(label);
+				block.appendChild(text);
+				modalTranslations.appendChild(block);
+			});
+
+			modalBackdrop.style.display = "flex";
+		}
+
+		function openReading(propId) {
+			var i = DATA.findIndex(function (d) { return d.id === propId; });
+			if (i === -1) {
+				// clicked a graph node outside the currently selected concept's
+				// filtered list (e.g. a dimmed proposition) - fall back to the
+				// full book so its own content still opens, with Prev/Next
+				// spanning the whole list rather than the (unrelated) filter.
+				DATA = PROPOSITIONS;
+				i = DATA.findIndex(function (d) { return d.id === propId; });
+			}
+			openModal(i);
+		}
+
+		function closeModal() { modalBackdrop.style.display = "none"; }
+
+		function modalRelative(delta) {
+			if (modalIndex === null) return;
+			var i = Math.max(0, Math.min(DATA.length - 1, modalIndex + delta));
+			if (i === modalIndex) return;
+			openModal(i);
+		}
+
+		modalPrev.addEventListener("click", function () { modalRelative(-1); });
+		modalNext.addEventListener("click", function () { modalRelative(1); });
+		modalClose.addEventListener("click", closeModal);
+		modalBackdrop.addEventListener("click", function (event) {
+			if (event.target === modalBackdrop) closeModal();
+		});
+
+		document.addEventListener("keydown", function (event) {
+			if (modalBackdrop.style.display !== "flex") return;
+			if (event.key === "ArrowLeft") { event.preventDefault(); modalRelative(-1); }
+			else if (event.key === "ArrowRight") { event.preventDefault(); modalRelative(1); }
+			else if (event.key === "Escape") { closeModal(); }
+		});
+
+		// ---------------------------------------------------------------
+		// initial state
+		// ---------------------------------------------------------------
+
+		renderPropositionList();
 
 	</script>
 
