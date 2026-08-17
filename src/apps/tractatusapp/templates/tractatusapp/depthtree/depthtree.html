@@ -1,0 +1,454 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'tractatusapp/ga.html' %}
+
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+	<title>Depth-Rhythm Tractatus</title>
+
+	<script type="text/javascript" src="{% static 'custom/tractatusapp/vendor/d3.v7.min.js' %}"></script>
+
+	<style type="text/css">
+
+		html, body { margin: 0; padding: 0; background: #fafafa; color: #222; font-family: arial, sans-serif; }
+
+		#header { padding: 15px 20px 5px 20px; }
+		#header h1 { margin: 0 0 5px 0; font-size: 22px; color: #750b0b; }
+		#header .homelink { font-size: 11px; }
+		#description { padding: 0 20px 10px 20px; font-size: 13px; color: #444; line-height: 1.5; }
+
+		#chart-container { position: relative; padding: 0 20px; }
+
+		.chapter-band { opacity: 0.35; }
+		.depth-area { fill: #750b0b; fill-opacity: 0.15; }
+		.depth-line { fill: none; stroke: #750b0b; stroke-width: 1.5px; }
+
+		.axis text { font-size: 11px; fill: #444; }
+		.axis path, .axis line { stroke: #999; }
+
+		.focus-line { stroke: #333; stroke-width: 1px; stroke-dasharray: 3,3; }
+		.focus-circle { fill: #750b0b; stroke: #fff; stroke-width: 1.5px; }
+		.selected-circle { fill: none; stroke: #750b0b; stroke-width: 2px; }
+
+		#tooltip {
+			position: absolute;
+			pointer-events: none;
+			background: rgba(20, 20, 20, 0.92);
+			color: #eee;
+			padding: 8px 10px;
+			border-radius: 4px;
+			font-size: 12px;
+			line-height: 1.4;
+			max-width: 320px;
+			display: none;
+		}
+		#tooltip b { color: #ffb3b3; }
+
+		#subfooter {
+			margin: 20px 20px 10px 20px;
+			font-size: 11px;
+			color: #666;
+		}
+
+		#reading-panel {
+			margin: 15px 20px 40px 20px;
+			padding: 22px 28px;
+			background: #fff;
+			border-left: 4px solid #750b0b;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+			cursor: default;
+		}
+
+		#reading-panel-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 10px;
+		}
+
+		#reading-panel-label {
+			font-family: arial, sans-serif;
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+			color: #750b0b;
+		}
+
+		#reading-panel-nav {
+			display: none;
+			gap: 8px;
+		}
+
+		#reading-panel-nav button {
+			font-family: arial, sans-serif;
+			font-size: 12px;
+			background: #fff;
+			color: #750b0b;
+			border: 1px solid #750b0b;
+			border-radius: 3px;
+			padding: 3px 10px;
+			cursor: pointer;
+		}
+
+		#reading-panel-nav button:hover:not(:disabled) {
+			background: #750b0b;
+			color: #fff;
+		}
+
+		#reading-panel-nav button:disabled {
+			opacity: 0.3;
+			cursor: default;
+		}
+
+		#reading-panel-placeholder {
+			font-family: arial, sans-serif;
+			font-size: 14px;
+			color: #999;
+			font-style: italic;
+		}
+
+		.translation-block {
+			padding-top: 18px;
+		}
+		.translation-block:first-child {
+			padding-top: 0;
+		}
+		.translation-block + .translation-block {
+			border-top: 1px solid #eee;
+		}
+
+		.translation-block-label {
+			font-family: arial, sans-serif;
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: #999;
+			margin-bottom: 6px;
+		}
+
+		.translation-block-text {
+			font-family: georgia, serif;
+			font-size: 20px;
+			line-height: 1.6;
+			color: #222;
+		}
+
+		.translation-block[data-key="german"] .translation-block-text {
+			font-style: italic;
+			color: #444;
+		}
+
+	</style>
+</head>
+
+
+<body>
+
+	<div id="header">
+		<h1>The 'Depth-Rhythm' Tractatus
+			<a class="homelink" href="{% url 'tractatusapp:witt_about' %}">home</a>
+		</h1>
+	</div>
+
+	<div id="description">{{ experiment_description|safe }}</div>
+
+	<div id="chart-container">
+		<svg id="chart"></svg>
+		<div id="tooltip"></div>
+	</div>
+
+	<div id="subfooter">
+		Ludwig Wittgenstein, Tractatus Logico-Philosophicus, 1921.
+	</div>
+
+	<div id="reading-panel">
+		<div id="reading-panel-header">
+			<div id="reading-panel-label">Selected proposition</div>
+			<div id="reading-panel-nav">
+				<button id="reading-prev" type="button" title="Previous (&larr;)">&larr; Previous</button>
+				<button id="reading-next" type="button" title="Next (&rarr;)">Next &rarr;</button>
+			</div>
+		</div>
+		<div id="reading-panel-placeholder">Click any point on the chart above to read that proposition in full, in every available translation. Use the &larr; &rarr; arrow keys to move between propositions.</div>
+		<div id="reading-panel-translations"></div>
+	</div>
+
+
+	<script type="text/javascript">
+
+		var DATA = {{ json|safe }};
+
+		var margin = { top: 20, right: 30, bottom: 30, left: 45 },
+			width = Math.max(900, window.innerWidth - margin.left - margin.right - 40),
+			height = 320;
+
+		var svg = d3.select("#chart")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom);
+
+		var clipId = "depthtree-clip";
+		svg.append("defs").append("clipPath")
+			.attr("id", clipId)
+			.append("rect")
+			.attr("width", width)
+			.attr("height", height);
+
+		var g = svg.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var x = d3.scaleLinear()
+			.domain([0, DATA.length - 1])
+			.range([0, width]);
+
+		var y = d3.scaleLinear()
+			.domain([0, d3.max(DATA, function (d) { return d.depth; })])
+			.nice()
+			.range([height, 0]);
+
+		var chapterColor = d3.scaleOrdinal()
+			.domain([1, 2, 3, 4, 5, 6, 7])
+			.range(["#750b0b", "#5d7d36", "#1a1a5e", "#8a6d00", "#4a1a5e", "#0b6b6b", "#5e2a0b"]);
+
+		// contiguous index ranges per chapter, for the background bands
+		var chapterSpans = [];
+		DATA.forEach(function (d, i) {
+			var last = chapterSpans[chapterSpans.length - 1];
+			if (!last || last.chapter !== d.chapter) {
+				chapterSpans.push({ chapter: d.chapter, start: i, end: i });
+			} else {
+				last.end = i;
+			}
+		});
+
+		var plotArea = g.append("g").attr("clip-path", "url(#" + clipId + ")");
+
+		var bands = plotArea.append("g").attr("class", "bands");
+
+		var area = d3.area()
+			.x(function (d, i) { return x(i); })
+			.y0(height)
+			.y1(function (d) { return y(d.depth); })
+			.curve(d3.curveLinear);
+
+		var line = d3.line()
+			.x(function (d, i) { return x(i); })
+			.y(function (d) { return y(d.depth); })
+			.curve(d3.curveLinear);
+
+		var areaPath = plotArea.append("path")
+			.datum(DATA)
+			.attr("class", "depth-area")
+			.attr("d", area);
+
+		var linePath = plotArea.append("path")
+			.datum(DATA)
+			.attr("class", "depth-line")
+			.attr("d", line);
+
+		var xAxisG = g.append("g")
+			.attr("class", "axis x-axis")
+			.attr("transform", "translate(0," + height + ")");
+
+		var yAxisG = g.append("g")
+			.attr("class", "axis y-axis");
+
+		yAxisG.call(d3.axisLeft(y).ticks(d3.max(DATA, function (d) { return d.depth; }) + 1).tickFormat(d3.format("d")));
+
+		yAxisG.append("text")
+			.attr("fill", "#444")
+			.attr("transform", "rotate(-90)")
+			.attr("y", -35)
+			.attr("x", -height / 2)
+			.attr("text-anchor", "middle")
+			.style("font-size", "11px")
+			.text("nesting depth");
+
+		var focusLine = g.append("line")
+			.attr("class", "focus-line")
+			.attr("y1", 0)
+			.attr("y2", height)
+			.style("display", "none");
+
+		var focusCircle = g.append("circle")
+			.attr("class", "focus-circle")
+			.attr("r", 4)
+			.style("display", "none");
+
+		var tooltip = d3.select("#tooltip");
+
+		var selectedCircle = g.append("circle")
+			.attr("class", "selected-circle")
+			.attr("r", 6)
+			.style("display", "none");
+
+		var readingLabel = document.getElementById("reading-panel-label");
+		var readingPlaceholder = document.getElementById("reading-panel-placeholder");
+		var readingTranslations = document.getElementById("reading-panel-translations");
+		var readingNav = document.getElementById("reading-panel-nav");
+		var prevBtn = document.getElementById("reading-prev");
+		var nextBtn = document.getElementById("reading-next");
+
+		var selectedIndex = null;
+
+		function positionSelectedCircle() {
+			if (selectedIndex === null) return;
+			var d = DATA[selectedIndex];
+			selectedCircle
+				.attr("cx", activeX(selectedIndex))
+				.attr("cy", y(d.depth))
+				.style("display", null);
+		}
+
+		function selectPoint(i) {
+			selectedIndex = i;
+			positionSelectedCircle();
+
+			var d = DATA[i];
+			readingLabel.textContent = d.name + " (chapter " + d.chapter + ", depth " + d.depth + ")";
+
+			readingPlaceholder.style.display = "none";
+			readingNav.style.display = "flex";
+			prevBtn.disabled = (i === 0);
+			nextBtn.disabled = (i === DATA.length - 1);
+			readingTranslations.innerHTML = "";
+
+			var translations = d.translations && d.translations.length ? d.translations : [];
+			if (!translations.length) {
+				var empty = document.createElement("div");
+				empty.className = "translation-block-text";
+				empty.textContent = "(no text available)";
+				readingTranslations.appendChild(empty);
+			}
+			translations.forEach(function (t) {
+				var block = document.createElement("div");
+				block.className = "translation-block";
+				block.setAttribute("data-key", t.key);
+
+				var label = document.createElement("div");
+				label.className = "translation-block-label";
+				label.textContent = t.label;
+
+				var text = document.createElement("div");
+				text.className = "translation-block-text";
+				text.textContent = t.text;
+
+				block.appendChild(label);
+				block.appendChild(text);
+				readingTranslations.appendChild(block);
+			});
+		}
+
+		function selectRelative(delta) {
+			if (selectedIndex === null) return;
+			var i = Math.max(0, Math.min(DATA.length - 1, selectedIndex + delta));
+			if (i === selectedIndex) return;
+			selectPoint(i);
+		}
+
+		prevBtn.addEventListener("click", function () { selectRelative(-1); });
+		nextBtn.addEventListener("click", function () { selectRelative(1); });
+
+		document.addEventListener("keydown", function (event) {
+			if (selectedIndex === null) return;
+			if (event.key === "ArrowLeft") {
+				selectRelative(-1);
+				event.preventDefault();
+			} else if (event.key === "ArrowRight") {
+				selectRelative(1);
+				event.preventDefault();
+			}
+		});
+
+		function chapterStartIndices() {
+			return chapterSpans.map(function (s) { return s.start; });
+		}
+
+		function render(currentX) {
+			bands.selectAll("rect")
+				.data(chapterSpans)
+				.join("rect")
+				.attr("class", "chapter-band")
+				.attr("x", function (d) { return currentX(d.start) - 2; })
+				.attr("width", function (d) { return Math.max(1, currentX(d.end) - currentX(d.start) + 4); })
+				.attr("y", 0)
+				.attr("height", height)
+				.attr("fill", function (d) { return chapterColor(d.chapter); });
+
+			areaPath.attr("d", area.x(function (d, i) { return currentX(i); }));
+			linePath.attr("d", line.x(function (d, i) { return currentX(i); }));
+
+			xAxisG.call(
+				d3.axisBottom(currentX)
+					.tickValues(chapterStartIndices())
+					.tickFormat(function (i) { return DATA[i].chapter; })
+			);
+		}
+
+		render(x);
+
+		var overlay = g.append("rect")
+			.attr("width", width)
+			.attr("height", height)
+			.style("fill", "none")
+			.style("cursor", "pointer")
+			.style("pointer-events", "all");
+
+		var activeX = x;
+
+		function nearestIndex(mx) {
+			var i0 = Math.round(activeX.invert(mx));
+			return Math.max(0, Math.min(DATA.length - 1, i0));
+		}
+
+		function showFocus(mx) {
+			var i = nearestIndex(mx);
+			var d = DATA[i];
+			var cx = activeX(i), cy = y(d.depth);
+
+			focusLine.attr("x1", cx).attr("x2", cx).style("display", null);
+			focusCircle.attr("cx", cx).attr("cy", cy).style("display", null);
+
+			tooltip
+				.style("display", "block")
+				.style("left", (cx + margin.left + 30) + "px")
+				.style("top", (cy + margin.top) + "px")
+				.html("<b>" + d.name + "</b> (chapter " + d.chapter + ", depth " + d.depth + ")<br />" + (d.text || ""));
+		}
+
+		function hideFocus() {
+			focusLine.style("display", "none");
+			focusCircle.style("display", "none");
+			tooltip.style("display", "none");
+		}
+
+		overlay
+			.on("mousemove", function (event) {
+				showFocus(d3.pointer(event, g.node())[0]);
+			})
+			.on("mouseleave", hideFocus)
+			.on("click", function (event) {
+				selectPoint(nearestIndex(d3.pointer(event, g.node())[0]));
+			});
+
+		var zoom = d3.zoom()
+			.scaleExtent([1, 25])
+			.translateExtent([[0, 0], [width, height]])
+			.extent([[0, 0], [width, height]])
+			.on("zoom", function (event) {
+				activeX = event.transform.rescaleX(x);
+				render(activeX);
+				hideFocus();
+				positionSelectedCircle();
+			});
+
+		svg.call(zoom);
+
+	</script>
+
+</body>
+</html>

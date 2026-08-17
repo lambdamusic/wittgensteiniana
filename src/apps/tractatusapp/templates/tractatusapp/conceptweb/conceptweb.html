@@ -1,0 +1,208 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'tractatusapp/ga.html' %}
+
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+	<title>Concept Web Tractatus</title>
+
+	<script type="text/javascript" src="{% static 'custom/tractatusapp/vendor/d3.v7.min.js' %}"></script>
+
+	<style type="text/css">
+
+		html, body { margin: 0; padding: 0; background: #14141a; color: #ddd; font-family: arial, sans-serif; }
+
+		#header { padding: 15px 20px 5px 20px; }
+		#header h1 { margin: 0 0 5px 0; font-size: 22px; color: #cfcfcf; }
+		#header .homelink { font-size: 11px; color: #8ab4d8; }
+		#description { padding: 0 20px 10px 20px; font-size: 13px; color: #aaa; line-height: 1.5; }
+
+		#chart-container { position: relative; padding: 0 20px; }
+
+		.link { stroke: #666; stroke-opacity: 0.25; }
+		.node-prop { cursor: pointer; stroke: #14141a; stroke-width: 0.5px; }
+		.node-keyword { cursor: pointer; fill: #f0e6c8; stroke: #333; stroke-width: 1px; }
+		.keyword-label { fill: #f0e6c8; font-size: 12px; font-weight: bold; pointer-events: none; }
+
+		.dimmed { opacity: 0.08; }
+
+		#tooltip {
+			position: absolute;
+			pointer-events: none;
+			background: rgba(20, 20, 25, 0.95);
+			color: #eee;
+			padding: 8px 10px;
+			border-radius: 4px;
+			font-size: 12px;
+			line-height: 1.4;
+			max-width: 320px;
+			display: none;
+			border: 1px solid #444;
+		}
+		#tooltip b { color: #f0e6c8; }
+
+		#subfooter {
+			margin: 20px 20px 40px 20px;
+			font-size: 11px;
+			color: #666;
+		}
+
+	</style>
+</head>
+
+
+<body>
+
+	<div id="header">
+		<h1>The Concept Web
+			<a class="homelink" href="{% url 'tractatusapp:witt_about' %}">home</a>
+		</h1>
+	</div>
+
+	<div id="description">{{ experiment_description|safe }}</div>
+
+	<div id="chart-container">
+		<svg id="chart"></svg>
+		<div id="tooltip"></div>
+	</div>
+
+	<div id="subfooter">
+		Ludwig Wittgenstein, Tractatus Logico-Philosophicus, 1921. Translated from the German by C.K. Ogden, 1922.
+	</div>
+
+
+	<script type="text/javascript">
+
+		var GRAPH = {{ json|safe }};
+
+		var width = Math.max(900, window.innerWidth - 60),
+			height = 680;
+
+		var svg = d3.select("#chart")
+			.attr("width", width)
+			.attr("height", height);
+
+		var g = svg.append("g");
+		var tooltip = d3.select("#tooltip");
+
+		var chapterColor = d3.scaleOrdinal()
+			.domain([1, 2, 3, 4, 5, 6, 7])
+			.range(["#e07a7a", "#8fbf6a", "#7a8fe0", "#e0c26a", "#c07ae0", "#6ac2c2", "#e0a06a"]);
+
+		var nodes = GRAPH.nodes;
+		var links = GRAPH.links;
+
+		var neighbors = {};
+		nodes.forEach(function (n) { neighbors[n.id] = new Set([n.id]); });
+		links.forEach(function (l) {
+			neighbors[l.source].add(l.target);
+			neighbors[l.target].add(l.source);
+		});
+
+		var simulation = d3.forceSimulation(nodes)
+			.force("link", d3.forceLink(links).id(function (d) { return d.id; })
+				.distance(function (l) { return l.target.type === "keyword" || l.source.type === "keyword" ? 55 : 30; })
+				.strength(0.35))
+			.force("charge", d3.forceManyBody().strength(-30))
+			.force("center", d3.forceCenter(width / 2, height / 2))
+			.force("collide", d3.forceCollide().radius(function (d) { return d.type === "keyword" ? 30 : 5; }))
+			.force("radial", d3.forceRadial(220, width / 2, height / 2).strength(function (d) { return d.type === "keyword" ? 0.5 : 0; }));
+
+		var link = g.append("g")
+			.selectAll("line")
+			.data(links)
+			.join("line")
+			.attr("class", "link");
+
+		var propNode = g.append("g")
+			.selectAll("circle")
+			.data(nodes.filter(function (d) { return d.type === "proposition"; }))
+			.join("circle")
+			.attr("class", "node-prop")
+			.attr("r", 4)
+			.attr("fill", function (d) { return chapterColor(d.chapter); })
+			.call(drag(simulation))
+			.on("mousemove", function (event, d) {
+				tooltip
+					.style("display", "block")
+					.style("left", (event.offsetX + 15) + "px")
+					.style("top", (event.offsetY + 15) + "px")
+					.html("<b>" + d.label + "</b> (chapter " + d.chapter + ")<br />" + (d.text || ""));
+			})
+			.on("mouseenter", function (event, d) { highlight(d); })
+			.on("mouseleave", function () { clearHighlight(); tooltip.style("display", "none"); });
+
+		var keywordNode = g.append("g")
+			.selectAll("circle")
+			.data(nodes.filter(function (d) { return d.type === "keyword"; }))
+			.join("circle")
+			.attr("class", "node-keyword")
+			.attr("r", 16)
+			.call(drag(simulation))
+			.on("mouseenter", function (event, d) { highlight(d); })
+			.on("mouseleave", function () { clearHighlight(); });
+
+		var keywordLabel = g.append("g")
+			.selectAll("text")
+			.data(nodes.filter(function (d) { return d.type === "keyword"; }))
+			.join("text")
+			.attr("class", "keyword-label")
+			.attr("text-anchor", "middle")
+			.attr("dy", 4)
+			.text(function (d) { return d.label; });
+
+		function highlight(d) {
+			var connected = neighbors[d.id];
+			link.classed("dimmed", function (l) { return !(connected.has(l.source.id) && connected.has(l.target.id)); });
+			propNode.classed("dimmed", function (n) { return !connected.has(n.id); });
+			keywordNode.classed("dimmed", function (n) { return !connected.has(n.id); });
+			keywordLabel.classed("dimmed", function (n) { return !connected.has(n.id); });
+		}
+
+		function clearHighlight() {
+			link.classed("dimmed", false);
+			propNode.classed("dimmed", false);
+			keywordNode.classed("dimmed", false);
+			keywordLabel.classed("dimmed", false);
+		}
+
+		simulation.on("tick", function () {
+			link
+				.attr("x1", function (d) { return d.source.x; })
+				.attr("y1", function (d) { return d.source.y; })
+				.attr("x2", function (d) { return d.target.x; })
+				.attr("y2", function (d) { return d.target.y; });
+
+			propNode.attr("cx", function (d) { return d.x; }).attr("cy", function (d) { return d.y; });
+			keywordNode.attr("cx", function (d) { return d.x; }).attr("cy", function (d) { return d.y; });
+			keywordLabel.attr("x", function (d) { return d.x; }).attr("y", function (d) { return d.y; });
+		});
+
+		function drag(sim) {
+			function dragstarted(event, d) {
+				if (!event.active) sim.alphaTarget(0.2).restart();
+				d.fx = d.x; d.fy = d.y;
+			}
+			function dragged(event, d) {
+				d.fx = event.x; d.fy = event.y;
+			}
+			function dragended(event, d) {
+				if (!event.active) sim.alphaTarget(0);
+				d.fx = null; d.fy = null;
+			}
+			return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
+		}
+
+		var zoom = d3.zoom()
+			.scaleExtent([0.4, 6])
+			.on("zoom", function (event) { g.attr("transform", event.transform); });
+
+		svg.call(zoom);
+
+	</script>
+
+</body>
+</html>

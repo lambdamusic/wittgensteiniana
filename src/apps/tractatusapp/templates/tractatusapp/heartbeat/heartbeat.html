@@ -1,0 +1,343 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'tractatusapp/ga.html' %}
+
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+	<title>Heartbeat Strip Tractatus</title>
+
+	<script type="text/javascript" src="{% static 'custom/tractatusapp/vendor/d3.v7.min.js' %}"></script>
+
+	<style type="text/css">
+
+		html, body { margin: 0; padding: 0; background: #f7f5f0; color: #2a2a26; font-family: arial, sans-serif; }
+
+		#header { padding: 15px 20px 5px 20px; }
+		#header h1 { margin: 0 0 5px 0; font-size: 22px; color: #2f6b3f; }
+		#header .homelink { font-size: 11px; color: #4a7a8a; }
+		#description { padding: 0 20px 10px 20px; font-size: 13px; color: #6b6b62; line-height: 1.5; }
+
+		#chart-container { position: relative; padding: 0 20px; }
+
+		.pulse-line { fill: none; stroke-width: 1.4px; }
+		.row-label { font-size: 12px; font-weight: bold; }
+		.hit-target { fill: transparent; cursor: pointer; }
+
+		#tooltip {
+			position: absolute;
+			pointer-events: none;
+			background: rgba(255, 253, 248, 0.98);
+			color: #241f1a;
+			padding: 8px 10px;
+			border-radius: 4px;
+			font-size: 12px;
+			line-height: 1.4;
+			max-width: 320px;
+			border: 1px solid #ddd8c8;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+			display: none;
+		}
+		#tooltip b { color: #2f6b3f; }
+
+		#reading-panel {
+			margin: 15px 20px 40px 20px;
+			padding: 22px 28px;
+			background: #efeee6;
+			border-left: 4px solid #2f6b3f;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+		}
+
+		#reading-panel-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 10px;
+		}
+
+		#reading-panel-label {
+			font-family: arial, sans-serif;
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+			color: #2f6b3f;
+		}
+
+		#reading-panel-nav {
+			display: none;
+			gap: 8px;
+		}
+
+		#reading-panel-nav button {
+			font-family: arial, sans-serif;
+			font-size: 12px;
+			background: transparent;
+			color: #2f6b3f;
+			border: 1px solid #2f6b3f;
+			border-radius: 3px;
+			padding: 3px 10px;
+			cursor: pointer;
+		}
+
+		#reading-panel-nav button:hover:not(:disabled) {
+			background: #2f6b3f;
+			color: #f7f5f0;
+		}
+
+		#reading-panel-nav button:disabled {
+			opacity: 0.3;
+			cursor: default;
+		}
+
+		#reading-panel-placeholder {
+			font-size: 13px;
+			color: #8a897d;
+			font-style: italic;
+			line-height: 1.5;
+		}
+
+		.translation-block {
+			padding-top: 18px;
+		}
+		.translation-block:first-child {
+			padding-top: 0;
+		}
+		.translation-block + .translation-block {
+			border-top: 1px solid #ddd8c8;
+		}
+
+		.translation-block-label {
+			font-family: arial, sans-serif;
+			font-size: 11px;
+			font-weight: bold;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: #8a897d;
+			margin-bottom: 6px;
+		}
+
+		.translation-block-text {
+			font-family: georgia, serif;
+			font-size: 20px;
+			line-height: 1.6;
+			color: #2a2a26;
+		}
+
+		.translation-block[data-key="german"] .translation-block-text {
+			font-style: italic;
+			color: #45443a;
+		}
+
+		#subfooter {
+			margin: 0 20px 20px 20px;
+			font-size: 11px;
+			color: #8a897d;
+		}
+
+	</style>
+</head>
+
+
+<body>
+
+	<div id="header">
+		<h1>The Heartbeat Strip
+			<a class="homelink" href="{% url 'tractatusapp:witt_about' %}">home</a>
+		</h1>
+	</div>
+
+	<div id="description">{{ experiment_description|safe }}</div>
+
+	<div id="chart-container">
+		<svg id="chart"></svg>
+		<div id="tooltip"></div>
+	</div>
+
+	<div id="reading-panel">
+		<div id="reading-panel-header">
+			<div id="reading-panel-label">Selected proposition</div>
+			<div id="reading-panel-nav">
+				<button id="reading-prev" type="button" title="Previous (&larr;)">&larr; Previous</button>
+				<button id="reading-next" type="button" title="Next (&rarr;)">Next &rarr;</button>
+			</div>
+		</div>
+		<div id="reading-panel-placeholder">Click any pulse above to read that proposition in full, in every available translation. Use the &larr; &rarr; arrow keys to move between propositions.</div>
+		<div id="reading-panel-translations"></div>
+	</div>
+
+	<div id="subfooter">
+		Ludwig Wittgenstein, Tractatus Logico-Philosophicus, 1921.
+	</div>
+
+
+	<script type="text/javascript">
+
+		var CHAPTERS = {{ json|safe }};
+
+		var margin = { top: 10, right: 20, bottom: 10, left: 60 },
+			width = Math.max(900, window.innerWidth - margin.left - margin.right - 40),
+			rowHeight = 90,
+			height = rowHeight * CHAPTERS.length;
+
+		var svg = d3.select("#chart")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom);
+
+		var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var chapterColor = d3.scaleOrdinal()
+			.domain([1, 2, 3, 4, 5, 6, 7])
+			.range(["#750b0b", "#5d7d36", "#1a1a5e", "#8a6d00", "#4a1a5e", "#0b6b6b", "#5e2a0b"]);
+
+		var maxSqrtWords = d3.max(CHAPTERS, function (c) {
+			return d3.max(c.units, function (u) { return Math.sqrt(u.words); });
+		});
+
+		var maxSpike = rowHeight * 0.62;
+		var tooltip = d3.select("#tooltip");
+
+		var selectedCircle = g.append("circle")
+			.attr("r", 8)
+			.attr("fill", "none")
+			.attr("stroke", "#2f6b3f")
+			.attr("stroke-width", 2)
+			.style("display", "none");
+
+		var FLAT = [];
+
+		CHAPTERS.forEach(function (c, rowIndex) {
+			var baselineY = rowIndex * rowHeight + rowHeight * 0.72;
+			var color = chapterColor(c.chapter);
+
+			var x = d3.scalePoint()
+				.domain(d3.range(c.units.length))
+				.range([10, width - 10])
+				.padding(0.5);
+
+			var step = c.units.length > 1 ? x(1) - x(0) : width;
+			var half = Math.min(step / 3, 10);
+
+			c.units.forEach(function (u, i) {
+				u._x = x(i);
+				u._y = baselineY - (Math.sqrt(u.words) / maxSqrtWords) * maxSpike;
+				u._i = FLAT.length;
+				FLAT.push(u);
+			});
+
+			var d = "M" + (x(0) - half) + "," + baselineY;
+			c.units.forEach(function (u, i) {
+				d += " L" + (x(i) - half) + "," + baselineY;
+				d += " L" + u._x + "," + u._y;
+				d += " L" + (x(i) + half) + "," + baselineY;
+			});
+
+			g.append("path")
+				.attr("class", "pulse-line")
+				.attr("stroke", color)
+				.attr("d", d);
+
+			g.append("line")
+				.attr("x1", 0).attr("x2", width)
+				.attr("y1", baselineY).attr("y2", baselineY)
+				.attr("stroke", color).attr("stroke-opacity", 0.15);
+
+			g.append("text")
+				.attr("class", "row-label")
+				.attr("x", -10)
+				.attr("y", baselineY + 4)
+				.attr("text-anchor", "end")
+				.attr("fill", color)
+				.text("Ch " + c.chapter);
+
+			g.selectAll("circle.hit-target-" + c.chapter)
+				.data(c.units)
+				.join("circle")
+				.attr("class", "hit-target")
+				.attr("cx", function (u) { return u._x; })
+				.attr("cy", function (u) { return u._y; })
+				.attr("r", Math.max(4, Math.min(half, 9)))
+				.on("mousemove", function (event, u) {
+					tooltip
+						.style("display", "block")
+						.style("left", (event.offsetX + 20) + "px")
+						.style("top", (event.offsetY) + "px")
+						.html("<b>" + u.name + "</b> (chapter " + c.chapter + ", " + u.words + " words)<br />" + (u.text || ""));
+				})
+				.on("mouseleave", function () { tooltip.style("display", "none"); })
+				.on("click", function (event, u) { selectPoint(u); });
+		});
+
+		var readingLabel = document.getElementById("reading-panel-label");
+		var readingPlaceholder = document.getElementById("reading-panel-placeholder");
+		var readingTranslations = document.getElementById("reading-panel-translations");
+		var readingNav = document.getElementById("reading-panel-nav");
+		var prevBtn = document.getElementById("reading-prev");
+		var nextBtn = document.getElementById("reading-next");
+
+		var selectedIndex = null;
+
+		function selectPoint(u) {
+			selectedIndex = u._i;
+			selectedCircle.attr("cx", u._x).attr("cy", u._y).style("display", null);
+
+			readingLabel.textContent = u.name + " (chapter " + u.chapter + ", depth " + u.depth + ")";
+			readingPlaceholder.style.display = "none";
+			readingNav.style.display = "flex";
+			prevBtn.disabled = (u._i === 0);
+			nextBtn.disabled = (u._i === FLAT.length - 1);
+			readingTranslations.innerHTML = "";
+
+			var translations = u.translations && u.translations.length ? u.translations : [];
+			if (!translations.length) {
+				var empty = document.createElement("div");
+				empty.className = "translation-block-text";
+				empty.textContent = "(no text available)";
+				readingTranslations.appendChild(empty);
+			}
+			translations.forEach(function (t) {
+				var block = document.createElement("div");
+				block.className = "translation-block";
+				block.setAttribute("data-key", t.key);
+
+				var label = document.createElement("div");
+				label.className = "translation-block-label";
+				label.textContent = t.label;
+
+				var text = document.createElement("div");
+				text.className = "translation-block-text";
+				text.textContent = t.text;
+
+				block.appendChild(label);
+				block.appendChild(text);
+				readingTranslations.appendChild(block);
+			});
+		}
+
+		function selectRelative(delta) {
+			if (selectedIndex === null) return;
+			var i = Math.max(0, Math.min(FLAT.length - 1, selectedIndex + delta));
+			if (i === selectedIndex) return;
+			selectPoint(FLAT[i]);
+		}
+
+		prevBtn.addEventListener("click", function () { selectRelative(-1); });
+		nextBtn.addEventListener("click", function () { selectRelative(1); });
+
+		document.addEventListener("keydown", function (event) {
+			if (selectedIndex === null) return;
+			if (event.key === "ArrowLeft") {
+				selectRelative(-1);
+				event.preventDefault();
+			} else if (event.key === "ArrowRight") {
+				selectRelative(1);
+				event.preventDefault();
+			}
+		});
+
+	</script>
+
+</body>
+</html>
