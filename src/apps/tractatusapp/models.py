@@ -305,9 +305,37 @@ class TextExpression(mymodels.EnhancedModel):
 
 
 
+class Topic(mymodels.EnhancedModel):
+	"""(Topic :::
+		A philosophical concept from the legacy OCML classification (eg "propositions-of-science"),
+		linked to the TextUnits (propositions) it was used to interpret.
+	"""
+	name = models.CharField(max_length=200, unique=True, verbose_name="name")
+	external_id = models.SlugField(max_length=200, unique=True,
+		verbose_name="OCML identifier", help_text="lower-cased OCML instance name, for idempotent re-import")
+	description = models.TextField(blank=True, verbose_name="description")
+	defined_by_view = models.CharField(max_length=200, blank=True, verbose_name="defined by view")
+	textunits = models.ManyToManyField('TextUnit', blank=True, related_name='topics')
+
+	class Admin(admin.ModelAdmin):
+		readonly_fields = ('created_at', 'updated_at')
+		list_display = ('name', 'external_id', 'editedrecord', 'review')
+		filter_horizontal = ('textunits',)
+		search_fields = ('name', 'external_id', 'description')
+		list_filter = ('updated_at', 'editedrecord', 'review')
+
+	class Meta:
+		verbose_name_plural = "Topics"
+
+	def __str__(self):
+		return self.name
+
+
+
+
 ##################
 #  Mon Oct	3 00:25:58 BST 2011
-#  AUTHORITY LISTS 
+#  AUTHORITY LISTS
 #
 ##################
 
