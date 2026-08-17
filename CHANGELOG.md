@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-08-17 — Database exported as RDF (Turtle)
+
+Added a `python manage.py export_rdf` command that exports the site's data - all 526 propositions, all 1,578 translation fragments (3 editions × 526), and all 182 concepts with their 1,095 links to propositions - as a standalone `schema.org`-based RDF graph, serialized to `backups/rdf/wittgensteiniana.ttl`. No custom ontology needed - schema.org covered everything:
+
+- `TextUnit` → `schema:Chapter`, at every nesting level (not just the 7 top-level ones), linked into a tree via `schema:isPartOf`, with `schema:position` giving each proposition's rank in true reading order.
+- `TextFragment` → `schema:CreativeWork`, linked to the proposition it realizes via `schema:exampleOfWork` and to its edition (`schema:isPartOf` an Ogden/Pears & McGuinness/German `schema:Book`). The two English translations are related to the German original via `schema:translationOfWork`.
+- `Topic` → `schema:DefinedTerm` (all 182, not just the 99 currently linked to a proposition - a full export includes the "orphan" concepts too), grouped under one `schema:DefinedTermSet`.
+- Concept↔proposition links → `schema:mentions` triples on the `Chapter` nodes, straight from `Topic.textunits.through`.
+
+New files: `tractatusapp/rdf_export.py` (graph-building logic, reuses `ordered_units()`/`all_translations_map()`/`clean_translation_html()` from `tractatus_reading_order.py` - no new data-access code needed) and `tractatusapp/management/commands/export_rdf.py`. Added `rdflib` as a dependency. Verified by round-tripping the output back through `rdflib.Graph().parse()` and re-querying the same "6.36" worked example used to verify `/conceptweb` - `schema:mentions` correctly resolves to "Propositions of Science", "Law of Causality", "Natural Science".
+
+## 2026-08-17 — `/conceptweb` rebuilt as a 3-panel concept explorer
+
+Replaced the placeholder 14-keyword regex version of `/conceptweb` with a real explorer over the `Topic` classification imported earlier the same day: a left sidebar of concepts (hover for description, click to select), a center D3 force graph (99 concept hub nodes ↔ 466 proposition satellite nodes, 1,095 edges, colored/highlighted in sync with the sidebars), and a right sidebar of propositions (all 466 by default, narrowed to the selected concept's propositions when one is picked). Clicking any proposition (sidebar or graph node) opens a full-screen reading overlay with all 3 translations and Prev/Next navigation through whichever list is currently active.
+
+Layout, graph mechanics (force simulation, drag, zoom, hover-dim), and the reading overlay are all adapted from existing patterns already used elsewhere in the app (`/silence`'s flex layout, `/ladder`'s modal, the original `/conceptweb`'s D3 setup) rather than built from scratch. Files touched: `views_conceptweb.py` (full rewrite), `templates/tractatusapp/conceptweb/conceptweb.html` (full rewrite).
+
+**Bug fixes found and fixed while building this:**
+
+- `tractatus_reading_order.ordered_units()` (shared by `/ladder`, `/depthtree`, `/silence`, `/heartbeat`, and now `/conceptweb`) returned propositions within a chapter in the wrong order at deeper nesting levels - e.g. `6.5, 6.54, 6.53, 6.52, 6.522, ...` instead of `6.5, 6.51, 6.52, 6.521, 6.522, 6.53, 6.54`. Root cause: it trusted mptt's `get_descendants()` traversal order, which reflects original record-insertion order, not proposition number. Fixed by re-sorting each chapter's descendants using a key that compares the digits after the "." as a string/decimal-fraction (matching Wittgenstein's own numbering scheme) rather than as an integer. This corrects proposition ordering - and therefore Prev/Next navigation - across all five visualizations that share this helper, not just the new one.
+- The initial 3-panel layout used `body { min-height: 100vh }`, which doesn't cap height - with a 466-item sidebar list, the whole page silently grew to ~15,000px tall instead of the sidebars scrolling internally within a fixed viewport, making the center graph appear completely blank (correct data, zero visible pixels). Fixed by switching to a fixed `height: 100vh` + `overflow: hidden` on `body`, letting the `min-height: 0` already set on the flex children do its job.
+- Clicking a graph proposition node that wasn't part of the currently-selected concept's filtered list opened the wrong proposition's text (silently falling back to index 0 of the filtered list rather than the node actually clicked), because the reading overlay used the same list for both "what's being displayed" and "Prev/Next bounds." Fixed by falling back to the full proposition list when the clicked node isn't a member of the currently active one.
+
 ## 2026-08-17 — Legacy concept classification imported as `Topic`
 
 Extracted a philosophical concept classification the user authored years ago in OCML (an old Lisp-based knowledge representation language) and imported it into the Django app as real, queryable data, so it can later be used to improve the `/conceptweb` visualization (currently driven by a hand-typed list of 14 keywords, see `views_conceptweb.py`).
