@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""
+Check that every internal link in the static export resolves to a file.
+
+Scans every HTML file under docs/ (or the folder given as the first argument)
+for href/src/srcset attributes, <option value> paths (the typewriter edition
+menu navigates with these) and meta-refresh targets; every CSS file for
+url(...) references; and sitemap.xml for its <loc> entries. Each link is
+resolved the way GitHub Pages serves files:
+
+    /foo        -> foo, foo.html, or foo/index.html
+    /foo/       -> foo/index.html
+
+Absolute links to the site's own domain (from docs/CNAME) are checked as
+internal. Links to 127.0.0.1 or localhost are always broken: they are wget
+leftovers for files it could not fetch. Other external links, and pure
+#fragments, are skipped. Exits 1 if any link is broken, so it can gate the build.
+
+Usage:
+    tools/check-links [docs]
+"""
+
+import os
+import re
+import sys
+from html.parser import HTMLParser
+from urllib.parse import unquote, urlsplit
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+CNAME_FILE = os.path.join(HERE, "..", "docs", "CNAME")
+
+SKIP_SCHEMES = ("mailto:", "data:", "javascript:", "tel:")
+LOCAL_HOSTS = ("127.0.0.1", "localhost")
+CSS_URL = re.compile(r"""url\(\s*['"]?([^'")]+)['"]?\s*\)""")
+CSS_COMMENT = re.compile(r"/\*.*?\*/", re.S)
+SITEMAP_LOC = re.compile(r"<loc>([^<]+)</loc>")
+REFRESH_URL = re.compile(r"url\s*=\s*['\"]?([^'\"]+)", re.I)
+
+
+class LinkParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.links = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        for name in ("href", "src"):
+            if attrs.get(name):
+                self.links.append(attrs[name])
+        if attrs.get("srcset"):
+            self.links += [c.strip().split(" ")[0] for c in attrs["srcset"].split(",") if c.strip()]
+        if tag == "option" and (attrs.get("value") or "").startswith("/"):
+            self.links.append(attrs["value"])
+        if tag == "meta" and (attrs.get("http-equiv") or "").lower() == "refresh":
+            match = REFRESH_URL.search(attrs.get("content") or "")
+            if match:
+                self.links.append(match.group(1))
+
+
+def own_host():
+    try:
+        with open(CNAME_FILE) as f:
+            return f.read().strip()
+    except OSError:
+        return None
+
+
+def resolves(root, path):
+    """True if a site-root-relative path is served by GitHub Pages."""
+    full = os.path.join(root, path.lstrip("/"))
+    if path.endswith("/"):
+        return os.path.isfile(os.path.join(full, "index.html"))
+    return (os.path.isfile(full)
+            or os.path.isfile(full + ".html")
+            or os.path.isfile(os.path.join(full, "index.html")))
+
+
+def is_broken(root, dirpath, link, host):
+    """None if the link is fine or external, else a reason string."""
+    link = link.strip()
+    if not link or link.startswith("#") or link.lower().startswith(SKIP_SCHEMES):
+        return None
+    parts = urlsplit(link)
+    if parts.netloc:
+        hostname = parts.hostname or ""
+        if hostname in LOCAL_HOSTS:
+            return "points at a local dev server"
+        if hostname != host:
+            return None
+    path = unquote(parts.path)
+    if not path:
+        return None
+    if not path.startswith("/"):
+        rel_dir = os.path.relpath(dirpath, root)
+        trailing = "/" if path.endswith("/") else ""
+        path = "/" + os.path.normpath(os.path.join(rel_dir, path)).lstrip("./") + trailing
+        if path == "//":
+            path = "/"
+    return None if resolves(root, path) else "missing"
+
+
+def links_in(path, text):
+    if path.endswith(".html"):
+        parser = LinkParser()
+        parser.feed(text)
+        return parser.links
+    if path.endswith(".css"):
+        return CSS_URL.findall(CSS_COMMENT.sub("", text))
+    if path.endswith("sitemap.xml"):
+        return SITEMAP_LOC.findall(text)
+    return []
+
+
+def check(root):
+    host = own_host()
+    broken = []
+    for dirpath, _, filenames in os.walk(root):
+        for filename in filenames:
+            if not filename.endswith((".html", ".css", "sitemap.xml")):
+                continue
+            source = os.path.join(dirpath, filename)
+            with open(source, encoding="utf-8", errors="replace") as f:
+                text = f.read()
+            for link in links_in(source, text):
+                reason = is_broken(root, dirpath, link, host)
+                if reason:
+                    broken.append((os.path.relpath(source, root), link, reason))
+    return broken
+
+
+if __name__ == "__main__":
+    root = sys.argv[1] if len(sys.argv) > 1 else "docs"
+    broken = check(root)
+    for source, link, reason in broken:
+        print(f"BROKEN  {source}  ->  {link}  ({reason})")
+    if broken:
+        print(f"\n{len(broken)} broken internal link(s) in {root}/")
+        sys.exit(1)
+    print(f"OK: all internal links in {root}/ resolve")

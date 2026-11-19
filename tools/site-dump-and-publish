@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 
+# port of the local Django server; override with e.g. PORT=8011 tools/site-dump-and-publish
+export PORT="${PORT:-8000}"
+
 
 
 echo "================="
 echo "PREREQUISITE"
-echo "Ensure site is running on 127.0.0.1:8000..."
+echo "Ensure site is running on 127.0.0.1:$PORT..."
 echo "================="
 
 
-if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null ; then
+if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null ; then
     echo ">>>>>>> DJANGO is RUNNING! "
     echo "================="
 else
-    echo "********* Django not running on 127.0.0.1:8000 **********"
+    echo "********* Django not running on 127.0.0.1:$PORT **********"
     echo ".. Exiting process. Please run the django server first."
     exit 1
 fi
@@ -22,7 +25,8 @@ echo "================="
 echo "Dumping site.."
 echo "================="
 
-./tools/site-dump
+# stop before committing if the dump or its link check failed
+./tools/site-dump || exit 1
 
 
 echo "================="

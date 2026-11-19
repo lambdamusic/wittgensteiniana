@@ -18,7 +18,8 @@
 				<small style="margin-left: 30px; color: black;">
 						Edition:
 						<select id="dynamic_select">
-							<option value="{% url 'tractatusapp:get_sentence_version' unit.name 'ogden' %}" {% ifequal currentversion 'ogden' %}selected{% endifequal %}>English (Ogden)</option>
+							{# ogden is the default edition: link its canonical URL, /typewriter/<num>/ #}
+							<option value="{% url 'tractatusapp:get_sentence' unit.name %}" {% ifequal currentversion 'ogden' %}selected{% endifequal %}>English (Ogden)</option>
 							<option value="{% url 'tractatusapp:get_sentence_version' unit.name 'pears' %}" {% ifequal currentversion 'pears' %}selected{% endifequal %}>English (Pears)</option>
 							<option value="{% url 'tractatusapp:get_sentence_version' unit.name 'german' %}" {% ifequal currentversion 'german' %}selected{% endifequal %}>German (original)</option>
 						</select>
