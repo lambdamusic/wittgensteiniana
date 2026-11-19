@@ -1,17 +1,30 @@
 #!/usr/bin/env bash
 
+set -e
+
+# port of the local Django server; override with e.g. PORT=8011 tools/site-dump
+PORT="${PORT:-8000}"
+HOST="http://127.0.0.1:$PORT"
+
 echo "================="
 echo "PREREQUISITE"
-echo "Ensure site is running on 127.0.0.1:8000..."
+echo "Ensure site is running on $HOST..."
 echo "================="
 
 
-if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null ; then
+if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null ; then
     echo ">>>>>>> DJANGO is RUNNING! "
     echo "================="
 else
     echo "********* Django not running **********"
     echo ".. Exiting process. Please run the django server first."
+    exit 1
+fi
+
+# another project's server on the same port would get mirrored over docs/
+if ! curl -s "$HOST/" | grep -q "<title>Wittgensteiniana" ; then
+    echo "********* $HOST is not serving Wittgensteiniana **********"
+    echo ".. Exiting process. Is another project's server on port $PORT?"
     exit 1
 fi
 
@@ -44,12 +57,38 @@ rm -rf $DIR_BUILD/*
 
 echo -e "\nWGET SITE INTO TEMP BUILD DIRECTORY.." 
 echo "+++++++++++++++++"
-wget  -P $DIR_BUILD -mkEpnp -nH http://127.0.0.1:8000/ --wait=0.1
+# wget does not follow the typewriter's edition menu (<option value>), so
+# seed the Pears and German pages of every proposition explicitly
+EXTRA_URLS="$DIR_BUILD/extra-urls.txt"
+mkdir -p $DIR_BUILD
+curl -s "$HOST/typewriter" | grep -oE 'href="/typewriter/[^"]+/"' | sed -E 's/href="([^"]+)"/\1/' | sort -u \
+    | while read -r p; do echo "$HOST${p}pears/"; echo "$HOST${p}german/"; done > $EXTRA_URLS
+echo "seeding $(wc -l < $EXTRA_URLS | tr -d ' ') typewriter edition URLs"
+
+# wget exits non-zero on any 404 while crawling; the link check below is the real gate
+wget  -P $DIR_BUILD -mkEpnp -nH "$HOST/" -i $EXTRA_URLS --wait=0.1 || true
+rm $EXTRA_URLS
 
 # add a log file
 cd $DIR_BUILD
 touch "$(date +"%Y_%m_%d_%I_%M_%p").log"
 cd ..
+
+
+#
+# redirects, robots.txt, sitemap.xml; then refuse to publish broken links
+#
+
+echo -e "\nPOST-PROCESS BUILD.."
+echo "+++++++++++++++++"
+./tools/postprocess-build $DIR_BUILD
+
+echo -e "\nCHECK INTERNAL LINKS.."
+echo "+++++++++++++++++"
+if ! ./tools/check-links $DIR_BUILD ; then
+    echo "********* Broken internal links: $DIR_DOCS/ left untouched **********"
+    exit 1
+fi
 
 
 #

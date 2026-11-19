@@ -1,0 +1,12 @@
+# Old URLs that should keep working on the static site.
+#
+# One redirect per line: <old path>  <target path>
+# tools/postprocess-build turns each into a meta-refresh page at <old path>
+# (written as <old path>/index.html, so it serves with or without a trailing
+# slash). Targets must exist in the export; tools/check-links fails otherwise.
+#
+# Generated automatically, not listed here:
+#   /typewriter/<num>/ogden/  ->  /typewriter/<num>/   (ogden is the default edition)
+
+# pre-2022 Django site, which mounted the app under /tractatus/ (seen in the Wayback Machine, 2014)
+/tractatus/spacetree    /spacetree.html

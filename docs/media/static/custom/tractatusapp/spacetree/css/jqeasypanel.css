@@ -86,7 +86,7 @@ ul.panelbuttons li {
 	border-radius: 5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
-	background:transparent url(http://127.0.0.1:8000/media/static/custom/tractatusapp/spacetree/css/buttun-bg.png) repeat-x top left;
+	background:transparent url(../img/jqeasypanel/buttun-bg.png) repeat-x top left;
 }
 ul.panelbuttons li a {
 	color:#FFF;

@@ -111,3 +111,5 @@ db.sqlite3
 db-bootstrap
 
 README_PRIVATE.md
+# backlog lives centrally in NVALT; this is a symlink
+backlog
